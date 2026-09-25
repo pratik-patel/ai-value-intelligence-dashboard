@@ -5,7 +5,7 @@ import {
   BarChart3,
   Building2,
   CalendarDays,
-  ChevronDown,
+  ChevronRight,
   FileSearch,
   Gauge,
   Search,
@@ -98,12 +98,23 @@ export default function Layout({ children }: LayoutProps) {
         </nav>
 
         <div className="border-t border-white/[0.06] bg-[#0a1524]/80">
-          <div className="mx-auto flex h-11 max-w-[1600px] items-center gap-2 overflow-x-auto px-5 text-xs lg:px-8">
-            <span className="mr-1 whitespace-nowrap text-slate-500">Viewing</span>
-            <ContextPill icon={Building2} label="Enterprise" />
-            <ContextPill icon={CalendarDays} label="Last 30 days" />
-            <ContextPill icon={Activity} label="All applications" />
-            <span className="ml-auto hidden whitespace-nowrap text-slate-500 lg:inline">Coverage 86% · Estimated usage units</span>
+          <div className="mx-auto flex min-h-11 max-w-[1600px] items-center gap-1 overflow-x-auto px-5 py-2 text-xs lg:px-8">
+            <span className="mr-1 whitespace-nowrap text-slate-600">Scope</span>
+            {[
+              ["enterprise", "Enterprise"],
+              ["portfolio", "Portfolio"],
+              ["team", "Team"],
+              ["user", "User"],
+            ].map(([level, label], index) => (
+              <div key={level} className="flex items-center">
+                {index > 0 ? <ChevronRight className="h-3 w-3 text-slate-700" /> : null}
+                <a href={`/explorer?level=${level}`} className="whitespace-nowrap rounded px-2 py-1 text-slate-300 hover:bg-white/[0.06] hover:text-cyan-200">{label}</a>
+              </div>
+            ))}
+            <div className="ml-auto hidden items-center gap-2 lg:flex">
+              <ContextPill icon={CalendarDays} label="Last 30 days" />
+              <ContextPill icon={Activity} label="All applications" />
+            </div>
           </div>
         </div>
       </header>
@@ -118,10 +129,9 @@ export default function Layout({ children }: LayoutProps) {
 
 function ContextPill({ icon: Icon, label }: { icon: typeof Activity; label: string }) {
   return (
-    <button className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-2.5 text-slate-300 transition-colors hover:bg-white/[0.07]">
+    <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-2.5 text-slate-400">
       <Icon className="h-3.5 w-3.5 text-slate-500" />
       {label}
-      <ChevronDown className="h-3 w-3 text-slate-600" />
-    </button>
+    </span>
   );
 }

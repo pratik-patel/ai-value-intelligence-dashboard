@@ -14,6 +14,17 @@ The redesign was reviewed through three lenses: experience architecture, enterpr
 - Avoid public individual productivity rankings. Compare patterns within matched cohorts and enforce minimum cohort sizes.
 - Remove client-side demo credentials. Production authentication and evidence handling belong behind secure server APIs.
 
+## Dashboard interaction model
+
+The interface borrows proven observability patterns from Datadog and Grafana without copying their visual identity:
+
+- persistent scope and time controls;
+- query-value KPI tiles, time-series panels, top lists, and exception tables;
+- cascading Enterprise → Portfolio → Team → User selection;
+- clicking a ranked row narrows the scope instead of opening another overloaded dashboard;
+- detailed traces appear only in the Evidence workflow;
+- page-level prose is kept to labels, status, and the next action.
+
 ## First-screen acceptance test
 
 A first-time executive should be able to answer these questions in less than ten seconds:

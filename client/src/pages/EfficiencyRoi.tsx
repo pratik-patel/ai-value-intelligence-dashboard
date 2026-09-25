@@ -16,11 +16,10 @@ export default function EfficiencyRoi() {
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6 px-5 py-8 lg:px-8">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="mb-2 flex items-center gap-2"><Badge className="border-violet-400/20 bg-violet-400/10 text-violet-200">Efficiency & ROI</Badge><Badge variant="outline" className="border-white/10 text-slate-400">Decision workspace</Badge></div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Connect consumption to outcomes before calling it ROI.</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">This view separates observed usage from modeled optimization and missing delivery signals. It is designed to prevent false productivity claims while making the next integration and routing decisions obvious.</p>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-300">Value</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">Efficiency & ROI</h1>
         </div>
         <Link href="/studio"><Button variant="outline" className="border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]">Open scenario planner <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
       </header>
@@ -35,7 +34,7 @@ export default function EfficiencyRoi() {
       <section className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
         <div className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-6">
           <div className="flex items-start justify-between gap-4">
-            <div><h2 className="text-base font-semibold text-slate-100">Value measurement readiness</h2><p className="mt-1 text-xs leading-5 text-slate-500">Observed, estimated and unavailable measures stay visually distinct.</p></div>
+            <div><h2 className="text-base font-semibold text-slate-100">Data readiness</h2></div>
             <Badge variant="outline" className="border-amber-400/20 text-amber-200">2 sources needed</Badge>
           </div>
           <div className="mt-6 space-y-3">
@@ -44,21 +43,20 @@ export default function EfficiencyRoi() {
             <ReadinessRow icon={CircleDollarSign} title="Financial model" detail="Provider price book, fixed licenses, labor value and realization factor" status="Connect" tone="amber" />
           </div>
           <div className="mt-5 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.06] p-4 text-xs leading-5 text-slate-300">
-            <span className="font-semibold text-cyan-200">Recommended first outcome:</span> use merged PRs that pass quality gates, then add deployment and incident signals. Story points should remain a within-team trend—not an enterprise leaderboard.
+            <span className="font-semibold text-cyan-200">Next:</span> connect quality-gated merged PRs.
           </div>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-6">
           <h2 className="text-base font-semibold text-slate-100">ROI contract</h2>
-          <p className="mt-1 text-xs leading-5 text-slate-500">A transparent formula leaders can audit.</p>
           <div className="mt-6 rounded-xl border border-white/[0.07] bg-black/20 p-5 text-center">
             <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">Estimated ROI</p>
             <p className="mt-3 text-lg font-semibold text-white">(Realized benefit − AI cost) ÷ AI cost</p>
           </div>
           <ul className="mt-5 space-y-3 text-xs leading-5 text-slate-400">
-            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Benefit</b> = confidence-weighted time saved × burdened rate × realization factor.</span></li>
-            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">AI cost</b> = provider charges + allocated subscription and tool cost.</span></li>
-            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Quality guardrail</b> = rework, escaped defects and change-failure rate.</span></li>
+            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Benefit:</b> time saved × labor value.</span></li>
+            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Cost:</b> provider + subscription spend.</span></li>
+            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Guardrail:</b> quality and rework.</span></li>
           </ul>
         </div>
       </section>
