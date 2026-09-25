@@ -9,7 +9,7 @@ The redesign was reviewed through three lenses: experience architecture, enterpr
 - Treat applications and providers as filterable telemetry dimensions.
 - Organize the product around executive questions, not internal workflow stages.
 - Limit the first screen to seven decision-oriented blocks and move evidence detail into drilldowns.
-- Add a dedicated Efficiency & ROI workspace. In the prototype, deterministic illustrative value data is acceptable only when visibly labeled; production ROI requires connected delivery and finance data.
+- Add a dedicated Efficiency & ROI workspace. Modeled value data supports product evaluation; production ROI requires connected delivery and finance data.
 - Preserve the source unit as “usage units”; do not rename provider credits as tokens or dollars.
 - Avoid public individual productivity rankings. Compare patterns within matched cohorts and enforce minimum cohort sizes.
 - Remove client-side demo credentials. Production authentication and evidence handling belong behind secure server APIs.

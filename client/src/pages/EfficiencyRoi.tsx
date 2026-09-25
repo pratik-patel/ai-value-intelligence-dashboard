@@ -2,7 +2,6 @@ import { ArrowRight, CircleDollarSign, GitPullRequest, Sparkles, Target } from "
 import { Link } from "wouter";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getScopedInteractions, useDashboardScope } from "@/lib/scope-context";
 import { formatConsumption } from "@/lib/telemetry-data";
@@ -23,7 +22,7 @@ export default function EfficiencyRoi() {
     <div className="mx-auto max-w-[1500px] space-y-5 px-5 py-7 lg:px-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-300">Efficiency & ROI</p><h1 className="mt-1 text-2xl font-semibold text-white">Turn consumption into evidence of value.</h1><p className="mt-1 text-xs text-slate-500">Compare output, model fit and workflow efficiency in the current scope.</p></div>
-        <div className="flex items-center gap-2"><Badge variant="outline" className="border-violet-400/20 text-violet-200">Illustrative outcomes</Badge><Link href="/studio"><Button variant="outline" className="border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]">Model a change <ArrowRight className="ml-2 h-4 w-4" /></Button></Link></div>
+        <Link href="/studio"><Button variant="outline" className="border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]">Model a change <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
       </header>
 
       <section className="grid overflow-hidden rounded-2xl border border-white/10 bg-[#0b1625]/82 sm:grid-cols-2 xl:grid-cols-4">
@@ -51,7 +50,6 @@ export default function EfficiencyRoi() {
         </Panel>
       </section>
 
-      <div className="rounded-xl border border-violet-400/15 bg-violet-400/[0.05] px-4 py-3 text-xs text-slate-400"><b className="text-violet-200">Data note:</b> usage and attribution come from the sample telemetry. Outcomes, quality, labor value and ROI are deterministic illustrative data designed to show the intended product experience.</div>
     </div>
   );
 }

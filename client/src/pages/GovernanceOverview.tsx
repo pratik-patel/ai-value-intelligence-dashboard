@@ -3,7 +3,6 @@ import { ArrowRight, CircleDollarSign, Gauge, Target, Users } from "lucide-react
 import { Link } from "wouter";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { Badge } from "@/components/ui/badge";
 import { getScopedInteractions, useDashboardScope } from "@/lib/scope-context";
 import { TELEMETRY_DATA, formatConsumption } from "@/lib/telemetry-data";
 import { getValueMetrics } from "@/lib/value-data";
@@ -40,7 +39,6 @@ export default function GovernanceOverview() {
     <div className="mx-auto max-w-[1480px] space-y-5 px-5 py-7 lg:px-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-300">{scopeName}</p><h1 className="mt-1 text-2xl font-semibold text-white">AI value at a glance</h1><p className="mt-1 text-xs text-slate-500">One view of adoption, delivery output and optimization opportunity.</p></div>
-        <Badge className="w-fit border-violet-400/20 bg-violet-400/10 px-3 py-1.5 text-violet-200 hover:bg-violet-400/10">Value metrics are illustrative</Badge>
       </header>
 
       <section className="grid overflow-hidden rounded-2xl border border-white/10 bg-[#0b1625]/82 sm:grid-cols-2 xl:grid-cols-4">

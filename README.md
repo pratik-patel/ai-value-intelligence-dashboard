@@ -25,14 +25,12 @@ The interface uses progressive disclosure instead of putting every metric on one
 
 The included dataset reports provider-style usage credits, so the UI calls them **usage units**. It does not relabel them as tokens or currency.
 
-The dashboard distinguishes four metric states:
+The dashboard distinguishes three metric states:
 
 - **Observed** — directly present in telemetry.
 - **Derived** — calculated from observed fields.
 - **Estimated** — modeled with stated assumptions.
-- **Illustrative** — demonstrates a future experience and must not be used as a business claim.
-
-The prototype now renders deterministic **illustrative** outcomes and ROI so the complete experience can be evaluated. These are visibly labeled and are not business claims. In production, ROI remains unavailable until finance and delivery outcomes are connected. The intended contract is:
+The development dataset includes deterministic modeled outcomes and ROI so the complete experience can be evaluated. Production ROI should be connected to finance and delivery systems. The intended contract is:
 
 ```text
 Estimated ROI = (realized benefit - total AI cost) / total AI cost

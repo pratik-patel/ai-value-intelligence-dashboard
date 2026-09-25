@@ -131,7 +131,7 @@ export default function UsageExplorer() {
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric label={isSubset ? "Shown-peer usage" : "Cohort usage"} value={`${formatConsumption(selectedUsage)} units`} note={`${activeUsers} active users shown`} />
-        <Metric label={isSubset ? "Shown-peer outcomes" : "Modeled outcomes"} value={selectedOutcomes.toLocaleString()} note="Quality-gated, illustrative" />
+        <Metric label={isSubset ? "Shown-peer outcomes" : "Modeled outcomes"} value={selectedOutcomes.toLocaleString()} note="Quality-gated outcome model" />
         <Metric label="Cohort median efficiency" value={medianEfficiency.toFixed(1)} note={`all ${allPeerMetrics.length} peers · outcomes / 1K`} accent />
         <Metric label="Cohort concentration" value={`${concentration}%`} note={`Top ${level} share across full cohort`} warn={concentration > 45} />
       </section>

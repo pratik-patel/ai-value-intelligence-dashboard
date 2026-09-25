@@ -47,7 +47,6 @@ export default function Layout({ children }: LayoutProps) {
 
           <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" className="hidden h-9 w-44 justify-start border-white/10 bg-black/20 text-slate-400 hover:bg-white/5 hover:text-slate-200 xl:flex" onClick={() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}><Search className="mr-2 h-4 w-4" />Search<kbd className="ml-auto rounded border border-white/10 px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd></Button>
-            <span className="hidden rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1.5 text-xs font-medium text-violet-200 lg:inline-flex">Illustrative data</span>
             <button type="button" onClick={() => setTheme((value) => value === "dark" ? "light" : "dark")} className="theme-toggle flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:bg-white/[0.07] hover:text-slate-100" aria-label={`Use ${theme === "dark" ? "light" : "dark"} theme`} title={`Use ${theme === "dark" ? "light" : "dark"} theme`}>{theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</button>
           </div>
         </div>

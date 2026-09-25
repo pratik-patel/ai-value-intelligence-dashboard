@@ -73,7 +73,6 @@ Each metric must carry scope, time period, unit, comparison, source state, and c
 - **Observed** — directly emitted by telemetry.
 - **Derived** — calculated from observed data.
 - **Estimated** — modeled from documented assumptions.
-- **Illustrative** — deterministic sample data used only to evaluate the product experience.
 
 Raw token or usage volume is a resource-efficiency measure. The mature unit economics are cost or usage per quality-gated outcome, such as cost per accepted assist, completed code review, resolved case, merged change, or successful agent action.
 
