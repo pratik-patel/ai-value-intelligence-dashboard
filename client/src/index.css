@@ -334,6 +334,28 @@
   color: #e2e8f0 !important;
 }
 
+/* Popovers render through a portal outside .app-shell. */
+:root[data-theme="light"] .peer-selector-popover {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #172033 !important;
+}
+
+:root[data-theme="light"] .peer-selector-popover .text-white,
+:root[data-theme="light"] .peer-selector-popover .text-slate-200,
+:root[data-theme="light"] .peer-selector-popover .text-slate-300 {
+  color: #172033 !important;
+}
+
+:root[data-theme="light"] .peer-selector-popover .text-slate-500,
+:root[data-theme="light"] .peer-selector-popover .text-slate-600 {
+  color: #64748b !important;
+}
+
+:root[data-theme="light"] .peer-selector-popover [class*="border-white/"] {
+  border-color: #e2e8f0 !important;
+}
+
 :root[data-theme="light"] ::-webkit-scrollbar-thumb {
   background: rgba(15, 23, 42, 0.16);
 }

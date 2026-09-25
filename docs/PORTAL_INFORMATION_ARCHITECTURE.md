@@ -86,3 +86,4 @@ Raw token or usage volume is a resource-efficiency measure. The mature unit econ
 - Sortable tables provide exact rank, share, quality, and drilldown.
 - Tooltips stay compact and never cover the comparison.
 - Detail is disclosed progressively: enterprise → portfolio → team → user → session → span.
+- Organization comparisons use a local **Peers shown** control. Cohorts larger than six open with the six highest-usage peers to keep charts readable; search, checkboxes, and **Reset to all** expose the rest. Hiding a peer changes visible series, shown-peer totals, and attribution; the full eligible cohort remains the fixed basis for median, rank, share, and concentration. At least one peer must remain visible.

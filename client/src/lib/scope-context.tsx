@@ -57,6 +57,10 @@ export function DashboardScopeProvider({ children }: { children: ReactNode }) {
   }
 
   function selectUser(id: string) {
+    if (!id) {
+      setUserId("");
+      return;
+    }
     const next = TELEMETRY_DATA.engineers.find((item) => item.userId === id || item.id === id);
     if (next) {
       setPortfolioId(next.costCenterId);
