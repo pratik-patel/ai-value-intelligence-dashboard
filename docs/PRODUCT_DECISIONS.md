@@ -43,6 +43,8 @@ A first-time executive should be able to answer these questions in less than ten
 - Every metric needs a scope, period, unit, comparison, source state, and confidence level.
 - Preserve each provider's original unit and provenance. Normalized usage is valid only when the conversion rule is visible and auditable.
 - Model right-sizing must consider task complexity and quality—not model price alone.
+- Quality is a fixed eligibility gate, not an optimization preference. The scenario planner may minimize usage or cost only among routes that meet or exceed the current quality baseline.
+- Route by task intent, ambiguity, blast radius, and verification risk: use high reasoning for specification, design, and ambiguous diagnosis; use lower reasoning for routine generation and bounded fixes; execute deterministic compilation and tests as tools; escalate after failed verification.
 - Tokens per story point is suitable only as a within-team trend because story-point scales differ.
 - Efficient exemplars must meet quality thresholds and have sufficient sample size.
 - “Associated with” is the appropriate language for observational pattern findings; causal claims require controlled evidence.
