@@ -217,6 +217,45 @@
   }
 }
 
+/* Recharts injects black inline text into its default tooltip. Keep every
+   chart hover legible against the dashboard's dark tooltip surface. */
+.recharts-default-tooltip {
+  background: rgba(7, 16, 28, 0.98) !important;
+  border: 1px solid rgba(148, 163, 184, 0.28) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.65rem 0.75rem !important;
+  font-family: var(--app-font-sans) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.35 !important;
+  box-shadow: 0 16px 36px rgba(2, 8, 23, 0.34) !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-label,
+.recharts-default-tooltip .recharts-tooltip-item,
+.recharts-default-tooltip .recharts-tooltip-item-name,
+.recharts-default-tooltip .recharts-tooltip-item-value,
+.recharts-default-tooltip .recharts-tooltip-item-separator {
+  color: #e2e8f0 !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-label {
+  margin-bottom: 0.35rem !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  color: #94a3b8 !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-item {
+  padding-block: 0.08rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.35 !important;
+}
+
+.recharts-default-tooltip .recharts-tooltip-item-list {
+  display: grid;
+  gap: 0.25rem;
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 8px;
