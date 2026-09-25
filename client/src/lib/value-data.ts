@@ -13,6 +13,20 @@ export type ValueMetrics = {
   cycleTimeImprovement: number;
 };
 
+export type ScalablePattern = {
+  userId: string;
+  userName: string;
+  teamName: string;
+  useCase: string;
+  useCaseShare: number;
+  dominantModel: string;
+  modelShare: number;
+  outcomes: number;
+  efficiency: number;
+  quality: number;
+  action: string;
+};
+
 function hash(value: string) {
   return value.split("").reduce((total, character) => ((total * 31 + character.charCodeAt(0)) >>> 0), 17);
 }
@@ -60,6 +74,38 @@ export function getWorkflowValue(interactions: InteractionSummary[]) {
   })).sort((a, b) => b.value - a.value);
 }
 
+export function getPatternsWorthScaling(interactions: InteractionSummary[], limit = 3): ScalablePattern[] {
+  const byUser = new Map<string, InteractionSummary[]>();
+  interactions.forEach((item) => byUser.set(item.engineerId, [...(byUser.get(item.engineerId) ?? []), item]));
+
+  return Array.from(byUser.entries()).map(([userId, rows]) => {
+    const metrics = getValueMetrics(rows, userId);
+    const workflows = summarizeUsage(rows, "useCaseLabel");
+    const models = summarizeUsage(rows, "modelName");
+    const topWorkflow = workflows[0];
+    const topModel = models[0];
+    const score = metrics.efficiencyIndex * 0.45 + metrics.successfulOutcomes * 0.35 + metrics.qualityPassRate * 0.2;
+    return {
+      userId,
+      userName: rows[0]?.engineerName ?? userId,
+      teamName: rows[0]?.teamName ?? "Team",
+      useCase: topWorkflow?.name ?? "Unattributed workflow",
+      useCaseShare: Math.round((topWorkflow?.value ?? 0) / (metrics.usage || 1) * 100),
+      dominantModel: topModel?.name ?? "Unattributed model",
+      modelShare: Math.round((topModel?.value ?? 0) / (metrics.usage || 1) * 100),
+      outcomes: metrics.successfulOutcomes,
+      efficiency: metrics.efficiencyIndex,
+      quality: metrics.qualityPassRate,
+      action: scaleActionFor(topWorkflow?.name),
+      score,
+      runs: metrics.runs,
+    };
+  }).filter((item) => item.runs >= 50 && item.outcomes >= 40 && item.quality >= 85)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(({ score: _score, runs: _runs, ...item }) => item);
+}
+
 export function getSkillValue(interactions: InteractionSummary[]) {
   const skills = [
     { name: "Code generation", match: ["implementation", "development", "coding"] },
@@ -73,4 +119,18 @@ export function getSkillValue(interactions: InteractionSummary[]) {
     const metrics = getValueMetrics(fallback, skill.name);
     return { name: skill.name, usage: metrics.usage, outcomes: metrics.successfulOutcomes, efficiency: metrics.efficiencyIndex };
   }).filter((item) => item.usage > 0).sort((a, b) => b.usage - a.usage);
+}
+
+function summarizeUsage(rows: InteractionSummary[], key: "useCaseLabel" | "modelName") {
+  const grouped = new Map<string, number>();
+  rows.forEach((item) => grouped.set(item[key] || "Unattributed", (grouped.get(item[key] || "Unattributed") ?? 0) + item.estimatedCredits));
+  return Array.from(grouped, ([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+}
+
+function scaleActionFor(useCase?: string) {
+  if (useCase === "Static Quality Gates") return "Reuse the tool-first quality-gate workflow and its model-routing pattern.";
+  if (useCase === "Implementation & Refactoring") return "Reuse focused change sets, clear acceptance criteria, and review checkpoints.";
+  if (useCase === "Impact Analysis") return "Standardize the analysis template and route routine cases to balanced models.";
+  if (useCase === "Code Review & Control Validation") return "Package the control checklist and tool sequence as a shared workflow.";
+  return "Document the workflow, model route, and validation gates before expanding it.";
 }

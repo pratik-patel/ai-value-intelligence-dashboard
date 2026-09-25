@@ -12,6 +12,7 @@ The redesign was reviewed through three lenses: experience architecture, enterpr
 - Add a dedicated Efficiency & ROI workspace. Modeled value data supports product evaluation; production ROI requires connected delivery and finance data.
 - Preserve the source unit as “usage units”; do not rename provider credits as tokens or dollars.
 - Avoid public individual productivity rankings. Compare patterns within matched cohorts and enforce minimum cohort sizes.
+- Present high-performing workflows as **Patterns worth scaling**, not a numbered employee leaderboard. A pattern requires at least 50 interactions, 40 successful outcomes, and 85% quality, then balances outcome volume, efficiency, and quality; every card links to supporting user evidence.
 - Remove client-side demo credentials. Production authentication and evidence handling belong behind secure server APIs.
 
 ## Dashboard interaction model
