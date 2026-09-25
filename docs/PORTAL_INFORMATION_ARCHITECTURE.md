@@ -54,15 +54,17 @@ The individual workspace therefore uses a compact profile, four measures, ranked
 
 Primary question: **What happened in this run, and why did it consume what it did?**
 
-A session should display a trace timeline with:
+A session can display a trace timeline with the following fields when they are emitted by the source or by an explicitly instrumented wrapper:
 
 - agent invocation and handoffs;
-- model calls, input/output/reasoning/cache tokens, latency, retries, and finish reason;
+- model calls, input/output tokens or provider usage units, latency, retries, and finish reason;
 - skill, plugin, tool, and MCP invocations;
 - context growth and compaction events;
 - errors, guardrail events, and human intervention;
 - quality result and attributed delivery outcome;
-- effective cost and attribution confidence.
+- effective cost from an auditable price book, plus attribution confidence.
+
+GPU-seconds are outside the product contract for developer-assistant sources such as GitHub Copilot and Claude Code. Cache tokens, reasoning tokens, tool calls, agents, and skills are optional source capabilities and remain hidden when unavailable.
 
 Prompt and response content must be redacted by default and protected by role-based access, retention, and audit controls.
 

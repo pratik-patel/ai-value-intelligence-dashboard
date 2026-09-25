@@ -11,6 +11,8 @@ The redesign was reviewed through three lenses: experience architecture, enterpr
 - Limit the first screen to seven decision-oriented blocks and move evidence detail into drilldowns.
 - Add a dedicated Efficiency & ROI workspace. Modeled value data supports product evaluation; production ROI requires connected delivery and finance data.
 - Preserve the source unit as “usage units”; do not rename provider credits as tokens or dollars.
+- Base model-routing views on fields developer tools can expose: request/model identity, input/output tokens or provider usage units, interaction channel, workflow attribution, and tool/agent metadata when instrumented.
+- Do not show GPU-seconds. Do not infer provider cache behavior, infrastructure cost, aborted runs, routing savings, or escalation events when the source does not report them.
 - Avoid public individual productivity rankings. Compare patterns within matched cohorts and enforce minimum cohort sizes.
 - Present high-performing workflows as **Patterns worth scaling**, not a numbered employee leaderboard. A pattern requires at least 50 interactions, 40 successful outcomes, and 85% quality, then balances outcome volume, efficiency, and quality; every card links to supporting user evidence.
 - Remove client-side demo credentials. Production authentication and evidence handling belong behind secure server APIs.
@@ -39,6 +41,7 @@ A first-time executive should be able to answer these questions in less than ten
 ## Metric guardrails
 
 - Every metric needs a scope, period, unit, comparison, source state, and confidence level.
+- Preserve each provider's original unit and provenance. Normalized usage is valid only when the conversion rule is visible and auditable.
 - Model right-sizing must consider task complexity and quality—not model price alone.
 - Tokens per story point is suitable only as a within-team trend because story-point scales differ.
 - Efficient exemplars must meet quality thresholds and have sufficient sample size.
