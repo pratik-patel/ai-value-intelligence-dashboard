@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, Command } from "lucide-react";
 import { useLocation } from "wouter";
-import { KIRO_DATA } from "@/lib/kiro-data";
+import { TELEMETRY_DATA } from "@/lib/telemetry-data";
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -28,10 +28,10 @@ export function CommandPalette() {
   if (!open) return null;
 
   const query = search.toLowerCase();
-  const matchingCostCenters = KIRO_DATA.costCenters.filter((item) => item.name.toLowerCase().includes(query));
-  const matchingTeams = KIRO_DATA.teams.filter((item) => item.name.toLowerCase().includes(query));
-  const matchingEngineers = KIRO_DATA.engineers.filter((item) => item.name.toLowerCase().includes(query));
-  const matchingInteractions = KIRO_DATA.interactions.filter(
+  const matchingCostCenters = TELEMETRY_DATA.costCenters.filter((item) => item.name.toLowerCase().includes(query));
+  const matchingTeams = TELEMETRY_DATA.teams.filter((item) => item.name.toLowerCase().includes(query));
+  const matchingEngineers = TELEMETRY_DATA.engineers.filter((item) => item.name.toLowerCase().includes(query));
+  const matchingInteractions = TELEMETRY_DATA.interactions.filter(
     (item) =>
       item.id.toLowerCase().includes(query) ||
       item.useCaseLabel.toLowerCase().includes(query) ||
@@ -47,7 +47,7 @@ export function CommandPalette() {
           <input
             autoFocus
             className="flex h-14 w-full bg-transparent py-3 text-sm outline-none placeholder:text-[#7D8AA3] text-[#F3F7FF]"
-            placeholder="Search cost centers, teams, engineers, or commands..."
+            placeholder="Search portfolios, teams, users, or evidence..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -59,11 +59,11 @@ export function CommandPalette() {
           {search ? (
             <div className="p-2 space-y-4">
               <CommandGroup
-                title="Cost Centers"
+                title="Portfolios"
                 items={matchingCostCenters.map((item) => ({
                   id: item.id,
                   label: item.name,
-                  meta: `${item.activeEngineers} engineers · ${Math.round(item.totalConsumption)} credits`,
+                  meta: `${item.activeEngineers} users · ${Math.round(item.totalConsumption)} usage units`,
                   href: `/detail/cost-center/${item.id}`,
                 }))}
                 onSelect={(href) => {
@@ -76,7 +76,7 @@ export function CommandPalette() {
                 items={matchingTeams.map((item) => ({
                   id: item.id,
                   label: item.name,
-                  meta: `${item.costCenterName} · ${Math.round(item.totalConsumption)} credits`,
+                  meta: `${item.costCenterName} · ${Math.round(item.totalConsumption)} usage units`,
                   href: `/detail/team/${item.id}`,
                 }))}
                 onSelect={(href) => {
@@ -85,7 +85,7 @@ export function CommandPalette() {
                 }}
               />
               <CommandGroup
-                title="Engineers"
+                title="Users"
                 items={matchingEngineers.map((item) => ({
                   id: item.id,
                   label: item.name,

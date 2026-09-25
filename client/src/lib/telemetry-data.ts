@@ -1,13 +1,13 @@
 import Papa from "papaparse";
 
-import subscriptionsCsv from "../../../attached_assets/kiro_subscriptions_export_1779985419286.csv?raw";
-import groupMappingCsv from "../../../attached_assets/kiro_group_user_mapping_1779985419287.csv?raw";
-import userActivityIdeCsv from "../../../attached_assets/kiro_user_activity_KIRO_IDE_1779985419286.csv?raw";
-import userActivityCliCsv from "../../../attached_assets/kiro_user_activity_KIRO_CLI_1779985419286.csv?raw";
-import userActivityPluginCsv from "../../../attached_assets/kiro_user_activity_PLUGIN_1779985419285.csv?raw";
-import interactionTelemetryCsv from "../../../attached_assets/kiro_interaction_telemetry_enriched_1779985419286.csv?raw";
-import chatLogsCsv from "../../../attached_assets/kiro_prompt_logs_chat_flattened_1779985419286.csv?raw";
-import inlineLogsCsv from "../../../attached_assets/kiro_prompt_logs_inline_suggestions_flattened_1779985419286.csv?raw";
+import subscriptionsCsv from "../../../attached_assets/telemetry_subscriptions_export.csv?raw";
+import groupMappingCsv from "../../../attached_assets/telemetry_org_user_mapping.csv?raw";
+import userActivityIdeCsv from "../../../attached_assets/telemetry_user_activity_IDE.csv?raw";
+import userActivityCliCsv from "../../../attached_assets/telemetry_user_activity_CLI.csv?raw";
+import userActivityPluginCsv from "../../../attached_assets/telemetry_user_activity_EXTENSION.csv?raw";
+import interactionTelemetryCsv from "../../../attached_assets/telemetry_interactions.csv?raw";
+import chatLogsCsv from "../../../attached_assets/telemetry_chat_evidence.csv?raw";
+import inlineLogsCsv from "../../../attached_assets/telemetry_inline_evidence.csv?raw";
 
 type Severity = "High" | "Medium" | "Low";
 export type EngineerFunction = "FE" | "BE" | "QA" | "AI";
@@ -26,7 +26,7 @@ type RecommendationType =
 interface SubscriptionRow {
   "User name": string;
   "Subscription status": string;
-  "Kiro plan": string;
+  "Plan": string;
   "Plan source": string;
   "Activation date": string;
 }
@@ -270,7 +270,7 @@ export interface ReportSummary {
   executiveSummary: string;
 }
 
-export interface KiroDataset {
+export interface TelemetryDataset {
   meta: {
     mode: "Connected Mode";
     freshness: "Last updated: 1 day ago";
@@ -686,7 +686,7 @@ function makeObservedDrivers(interaction: Omit<InteractionSummary, "inputDrivers
     });
   }
 
-  if (interaction.toolInvocationCount >= 5 || interaction.pluginName !== "Direct Kiro" || interaction.mcpServer !== "No MCP Invoked") {
+  if (interaction.toolInvocationCount >= 5 || interaction.pluginName !== "Direct Assistant" || interaction.mcpServer !== "No MCP Invoked") {
     estimated.push({
       label: "Tool Augmentation Burden",
       kind: "Estimated",
@@ -722,7 +722,7 @@ function makeObservedDrivers(interaction: Omit<InteractionSummary, "inputDrivers
   return [...observed, ...estimated];
 }
 
-function buildDataset(): KiroDataset {
+function buildDataset(): TelemetryDataset {
   const subscriptionRows = parseCsv<SubscriptionRow>(subscriptionsCsv);
   const mappingRows = parseCsv<GroupMappingRow>(groupMappingCsv);
   const activityRows = [
@@ -739,7 +739,7 @@ function buildDataset(): KiroDataset {
       row["User name"],
       {
         status: row["Subscription status"],
-        tier: row["Kiro plan"],
+        tier: row["Plan"],
         planSource: row["Plan source"],
         activationDate: row["Activation date"],
       },
@@ -807,7 +807,7 @@ function buildDataset(): KiroDataset {
         activeDays: new Set<string>(),
         totalMessages: 0,
         chatConversations: 0,
-        clientCredits: { KIRO_IDE: 0, KIRO_CLI: 0, PLUGIN: 0 },
+        clientCredits: { IDE: 0, CLI: 0, PLUGIN: 0 },
         topUseCaseMap: new Map(),
         topModelMap: new Map(),
         topPluginMap: new Map(),
@@ -891,7 +891,7 @@ function buildDataset(): KiroDataset {
       interactionChannel: row.Channel,
       requestSource: row.Request_Source,
       agentPattern: row.Agent_Pattern,
-      pluginName: row.Plugin_Name || "Direct Kiro",
+      pluginName: row.Plugin_Name || "Direct Assistant",
       mcpServer: row.MCP_Server || "No MCP Invoked",
       toolInvocationCount: toNumber(row.Tool_Invocation_Count),
       estimatedCredits: scaledInteractionCredits,
@@ -961,7 +961,7 @@ function buildDataset(): KiroDataset {
       clientMix: toPercentMap(metric.clientCredits),
       topUseCase: topKeyFromMap(metric.topUseCaseMap),
       topModel: topKeyFromMap(metric.topModelMap),
-      topPlugin: topKeyFromMap(metric.topPluginMap, "Direct Kiro"),
+      topPlugin: topKeyFromMap(metric.topPluginMap, "Direct Assistant"),
       interactionCount: metric.interactionIds.length,
       recommendationIds: [],
     }))
@@ -1115,7 +1115,7 @@ function buildDataset(): KiroDataset {
           }, new Map<string, number>()),
         ),
       ),
-      "Direct Kiro",
+      "Direct Assistant",
     );
     useCase.dominantMcp = topKeyFromMap(
       new Map(
@@ -1264,7 +1264,7 @@ function buildDataset(): KiroDataset {
           `Average prompt size: ${useCase.avgPromptChars.toLocaleString()} chars`,
         ],
         recommendedAction: "Default unit-test generation to lower-cost coder models such as Qwen3 Coder Next or DeepSeek V3.2, and escalate only for unusual fixtures, integration complexity, or cross-service reasoning.",
-        expectedImpact: "Reduces routine test-generation cost while keeping Kiro focused on coverage expansion rather than expensive default reasoning.",
+        expectedImpact: "Reduces routine test-generation cost while keeping AI assistant focused on coverage expansion rather than expensive default reasoning.",
         evidenceInteractionIds: interactions
           .filter((interaction) => interaction.useCaseKey === useCase.key)
           .slice(0, 2)
@@ -1294,7 +1294,7 @@ function buildDataset(): KiroDataset {
           `Top request source: ${useCase.topRequestSource}`,
           `Dominant plugin/MCP: ${useCase.dominantPlugin} / ${useCase.dominantMcp}`,
         ],
-        recommendedAction: "Move repeatable checks into hooks, scripts, or workflow automation for steps such as CI validation, security gates, quality checks, and test execution. Keep Kiro focused on interpretation, exception handling, and remediation choices.",
+        recommendedAction: "Move repeatable checks into hooks, scripts, or workflow automation for steps such as CI validation, security gates, quality checks, and test execution. Keep AI assistant focused on interpretation, exception handling, and remediation choices.",
         expectedImpact: "Reduces chat-driven spend and produces more repeatable, policy-controlled delivery behavior.",
         evidenceInteractionIds: interactions
           .filter((interaction) => interaction.useCaseKey === useCase.key)
@@ -1354,7 +1354,7 @@ function buildDataset(): KiroDataset {
     }
 
     if (
-      useCase.dominantPlugin !== "Direct Kiro" &&
+      useCase.dominantPlugin !== "Direct Assistant" &&
       (["plugin-action", "mcp-tool"].includes(useCase.topRequestSource) || useCase.deterministicShare >= 0.25)
     ) {
       addRecommendation({
@@ -1365,7 +1365,7 @@ function buildDataset(): KiroDataset {
         scopeType: "Use Case",
         scopeId: useCase.key,
         scopeLabel: useCase.label,
-        whyItMatters: "This workflow is leaning on plugin or MCP augmentation in places where a narrower hook or direct Kiro path may be enough.",
+        whyItMatters: "This workflow is leaning on plugin or MCP augmentation in places where a narrower hook or direct AI assistant path may be enough.",
         supportingSignals: [
           `Top request source: ${useCase.topRequestSource}`,
           `Dominant plugin/MCP: ${useCase.dominantPlugin} / ${useCase.dominantMcp}`,
@@ -1442,7 +1442,7 @@ function buildDataset(): KiroDataset {
 
   const pluginHotspot = Array.from(
     interactions.reduce((acc, interaction) => {
-      if (interaction.pluginName === "Direct Kiro") return acc;
+      if (interaction.pluginName === "Direct Assistant") return acc;
       acc.set(interaction.pluginName, (acc.get(interaction.pluginName) || 0) + interaction.estimatedCredits);
       return acc;
     }, new Map<string, number>()),
@@ -1575,8 +1575,8 @@ function buildDataset(): KiroDataset {
     const scopedEngineers = engineers.filter((engineer) => engineer.costCenterId === costCenter.id);
     const totals = scopedEngineers.reduce(
       (acc, engineer) => {
-        acc.ide += engineer.clientMix.KIRO_IDE || 0;
-        acc.cli += engineer.clientMix.KIRO_CLI || 0;
+        acc.ide += engineer.clientMix.IDE || 0;
+        acc.cli += engineer.clientMix.CLI || 0;
         acc.plugin += engineer.clientMix.PLUGIN || 0;
         return acc;
       },
@@ -1691,18 +1691,18 @@ function buildDataset(): KiroDataset {
   };
 }
 
-export const KIRO_DATA = buildDataset();
+export const TELEMETRY_DATA = buildDataset();
 
 export function getTeamsForCostCenter(costCenterId: string) {
-  return KIRO_DATA.teams.filter((team) => team.costCenterId === costCenterId);
+  return TELEMETRY_DATA.teams.filter((team) => team.costCenterId === costCenterId);
 }
 
 export function getEngineersForTeam(teamId: string) {
-  return KIRO_DATA.engineers.filter((engineer) => engineer.teamId === teamId);
+  return TELEMETRY_DATA.engineers.filter((engineer) => engineer.teamId === teamId);
 }
 
 export function getInteractionsForScope(scope: Scope) {
-  return KIRO_DATA.interactions.filter((interaction) => {
+  return TELEMETRY_DATA.interactions.filter((interaction) => {
     if (scope.costCenterId && interaction.costCenterId !== scope.costCenterId) return false;
     if (scope.teamId && interaction.teamId !== scope.teamId) return false;
     if (scope.engineerId && interaction.userId !== scope.engineerId) return false;
@@ -1715,7 +1715,7 @@ export function getUseCaseSummariesForScope(scope: Scope) {
   const scopedInteractions = getInteractionsForScope(scope);
   const summaries = new Map<string, UseCaseSummary>();
   scopedInteractions.forEach((interaction) => {
-    const base = KIRO_DATA.useCases.find((useCase) => useCase.key === interaction.useCaseKey);
+    const base = TELEMETRY_DATA.useCases.find((useCase) => useCase.key === interaction.useCaseKey);
     if (!base) return;
     if (!summaries.has(base.key)) {
       summaries.set(base.key, { ...base, totalConsumption: 0, interactionCount: 0, avgPromptChars: 0, avgResponseChars: 0, relatedRecommendationIds: base.relatedRecommendationIds });
@@ -1736,7 +1736,7 @@ export function getUseCaseSummariesForScope(scope: Scope) {
 }
 
 export function getRecommendationsForScope(scopeType: Recommendation["scopeType"], scopeId: string) {
-  return KIRO_DATA.recommendations.filter(
+  return TELEMETRY_DATA.recommendations.filter(
     (recommendation) =>
       (recommendation.scopeType === scopeType && recommendation.scopeId === scopeId) ||
       recommendation.scopeType === "Enterprise",
@@ -1744,19 +1744,19 @@ export function getRecommendationsForScope(scopeType: Recommendation["scopeType"
 }
 
 export function getInteractionById(interactionId: string | null | undefined) {
-  return KIRO_DATA.interactions.find((interaction) => interaction.id === interactionId) || null;
+  return TELEMETRY_DATA.interactions.find((interaction) => interaction.id === interactionId) || null;
 }
 
 export function getCostCenterById(costCenterId: string | undefined) {
-  return KIRO_DATA.costCenters.find((costCenter) => costCenter.id === costCenterId) || null;
+  return TELEMETRY_DATA.costCenters.find((costCenter) => costCenter.id === costCenterId) || null;
 }
 
 export function getTeamById(teamId: string | undefined) {
-  return KIRO_DATA.teams.find((team) => team.id === teamId) || null;
+  return TELEMETRY_DATA.teams.find((team) => team.id === teamId) || null;
 }
 
 export function getEngineerBySlug(engineerSlug: string | undefined) {
-  return KIRO_DATA.engineers.find((engineer) => engineer.id === engineerSlug) || null;
+  return TELEMETRY_DATA.engineers.find((engineer) => engineer.id === engineerSlug) || null;
 }
 
 export function formatConsumption(value: number) {

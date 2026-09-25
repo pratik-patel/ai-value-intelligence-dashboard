@@ -1,5 +1,5 @@
-import { formatConsumption } from "@/lib/kiro-data";
-import type { InteractionSummary, Recommendation } from "@/lib/kiro-data";
+import { formatConsumption } from "@/lib/telemetry-data";
+import type { InteractionSummary, Recommendation } from "@/lib/telemetry-data";
 
 type RecommendationInsightLike = {
   recommendation: Recommendation;

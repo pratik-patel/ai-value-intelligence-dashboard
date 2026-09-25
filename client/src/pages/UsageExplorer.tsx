@@ -30,14 +30,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import {
   type EngineerFunction,
-  KIRO_DATA,
+  TELEMETRY_DATA,
   formatConsumption,
   getEngineersForTeam,
   getInteractionsForScope,
   getRecommendationsForScope,
   getTeamsForCostCenter,
   getUseCaseSummariesForScope,
-} from "@/lib/kiro-data";
+} from "@/lib/telemetry-data";
 
 const CHART_BLUE = "#4B8BFF";
 const CHART_GRID = "rgba(148, 163, 184, 0.12)";
@@ -89,19 +89,19 @@ function engineerDetailHref(engineerId: string) {
 
 export default function UsageExplorer() {
   const [search, setSearch] = useState("");
-  const [selectedCostCenterId, setSelectedCostCenterId] = useState(KIRO_DATA.costCenters[0]?.id ?? "");
+  const [selectedCostCenterId, setSelectedCostCenterId] = useState(TELEMETRY_DATA.costCenters[0]?.id ?? "");
   const [selectedTeamId, setSelectedTeamId] = useState("");
   const [selectedEngineerId, setSelectedEngineerId] = useState("");
   const [evidenceInteractionId, setEvidenceInteractionId] = useState<string | null>(null);
 
   const filteredCostCenters = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return KIRO_DATA.costCenters;
-    return KIRO_DATA.costCenters.filter((costCenter) => costCenter.name.toLowerCase().includes(query));
+    if (!query) return TELEMETRY_DATA.costCenters;
+    return TELEMETRY_DATA.costCenters.filter((costCenter) => costCenter.name.toLowerCase().includes(query));
   }, [search]);
 
   const selectedCostCenter =
-    KIRO_DATA.costCenters.find((costCenter) => costCenter.id === selectedCostCenterId) ?? KIRO_DATA.costCenters[0] ?? null;
+    TELEMETRY_DATA.costCenters.find((costCenter) => costCenter.id === selectedCostCenterId) ?? TELEMETRY_DATA.costCenters[0] ?? null;
   const teamsForCostCenter = selectedCostCenter ? getTeamsForCostCenter(selectedCostCenter.id) : [];
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function UsageExplorer() {
       return getEngineersForTeam(selectedTeam.id).sort((left, right) => right.totalConsumption - left.totalConsumption);
     }
     if (selectedCostCenter) {
-      return KIRO_DATA.engineers
+      return TELEMETRY_DATA.engineers
         .filter((engineer) => engineer.costCenterId === selectedCostCenter.id)
         .sort((left, right) => right.totalConsumption - left.totalConsumption);
     }
@@ -392,9 +392,9 @@ export default function UsageExplorer() {
       />
 
       <ExperienceHeader
-        eyebrow="Scope Drilldown"
-        title="Usage Explorer"
-        lead="Move from cost center to engineer, compare spend patterns, and find the evidence trail behind recommendations."
+        eyebrow="Organization"
+        title="Enterprise → Portfolio → Team → User"
+        lead="Start with portfolio contribution, drill into teams and users, and compare usage patterns without losing organizational context."
         stats={explorerHeaderStats}
         journey={explorerJourney}
         actions={
@@ -635,7 +635,7 @@ export default function UsageExplorer() {
               </div>
               <div className="rounded-2xl border border-white/8 bg-[#0B1120] px-4 py-3 min-w-[220px]">
                 <p className="dashboard-metric-label">Peak Day</p>
-                <p className="dashboard-metric-value text-slate-100">{formatChartDate(peakDay.date || KIRO_DATA.meta.lastUpdated)}</p>
+                <p className="dashboard-metric-value text-slate-100">{formatChartDate(peakDay.date || TELEMETRY_DATA.meta.lastUpdated)}</p>
                 <p className="text-sm text-slate-400 mt-1">
                   {peakDay.consumption ? `${formatConsumption(peakDay.consumption)} credits` : "No scoped interactions"}
                 </p>

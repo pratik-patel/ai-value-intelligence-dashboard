@@ -8,8 +8,8 @@ import { ExperienceHeader } from "@/components/experience/ExperienceHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { KIRO_DATA, formatConsumption, getInteractionById } from "@/lib/kiro-data";
-import type { AdvisorRun, InteractionSummary, Recommendation } from "@/lib/kiro-data";
+import { TELEMETRY_DATA, formatConsumption, getInteractionById } from "@/lib/telemetry-data";
+import type { AdvisorRun, InteractionSummary, Recommendation } from "@/lib/telemetry-data";
 
 const severityStyles = {
   High: "bg-red-500/10 text-red-300 border-red-500/20",
@@ -104,7 +104,7 @@ const RECOMMENDATIONS_ROUTE_EVENT = "recommendations:route-change";
 export default function Recommendations() {
   const recommendationInsights = useMemo(
     () =>
-      [...KIRO_DATA.recommendations]
+      [...TELEMETRY_DATA.recommendations]
         .map((recommendation) => deriveRecommendationInsight(recommendation))
         .sort((left, right) => {
           const severityDelta = severityOrder[left.recommendation.severity] - severityOrder[right.recommendation.severity];
@@ -313,9 +313,9 @@ export default function Recommendations() {
       />
 
       <ExperienceHeader
-        eyebrow="Decision Queue"
-        title="Recommendations"
-        lead="Prioritize the interventions with the clearest business signal, inspect the evidence, and route the right actions into simulation or reporting."
+        eyebrow="Optimization queue"
+        title="Evidence-backed actions"
+        lead="Prioritize model, context, workflow, license, and policy changes by expected value, confidence, and supporting evidence."
         stats={headerStats}
         journey={journey}
         actions={
@@ -970,7 +970,7 @@ function deriveRecommendationInsight(recommendation: Recommendation): Recommenda
     scopeMetrics.overrun * 2 +
     evidence.length * 35 +
     richEvidenceCount * 20;
-  const relevantRuns = KIRO_DATA.runs.filter((run) => isRunRelevant(run, recommendation)).slice(0, 3);
+  const relevantRuns = TELEMETRY_DATA.runs.filter((run) => isRunRelevant(run, recommendation)).slice(0, 3);
 
   return {
     recommendation,
@@ -985,20 +985,20 @@ function deriveRecommendationInsight(recommendation: Recommendation): Recommenda
     proofSummary,
     scopeSummary,
     priorityScore,
-    relevantRuns: relevantRuns.length ? relevantRuns : KIRO_DATA.runs.slice(0, 2),
+    relevantRuns: relevantRuns.length ? relevantRuns : TELEMETRY_DATA.runs.slice(0, 2),
   };
 }
 
 function resolveScopeMetrics(recommendation: Recommendation) {
   if (recommendation.scopeType === "Enterprise") {
     return {
-      totalConsumption: KIRO_DATA.kpis.totalConsumption,
-      overrun: KIRO_DATA.kpis.overrun,
+      totalConsumption: TELEMETRY_DATA.kpis.totalConsumption,
+      overrun: TELEMETRY_DATA.kpis.overrun,
     };
   }
 
   if (recommendation.scopeType === "Cost Center") {
-    const scope = KIRO_DATA.costCenters.find((item) => item.id === recommendation.scopeId);
+    const scope = TELEMETRY_DATA.costCenters.find((item) => item.id === recommendation.scopeId);
     return {
       totalConsumption: scope?.totalConsumption ?? 0,
       overrun: scope?.overrun ?? 0,
@@ -1006,7 +1006,7 @@ function resolveScopeMetrics(recommendation: Recommendation) {
   }
 
   if (recommendation.scopeType === "Team") {
-    const scope = KIRO_DATA.teams.find((item) => item.id === recommendation.scopeId);
+    const scope = TELEMETRY_DATA.teams.find((item) => item.id === recommendation.scopeId);
     return {
       totalConsumption: scope?.totalConsumption ?? 0,
       overrun: scope?.overrun ?? 0,
@@ -1014,7 +1014,7 @@ function resolveScopeMetrics(recommendation: Recommendation) {
   }
 
   if (recommendation.scopeType === "Engineer") {
-    const scope = KIRO_DATA.engineers.find((item) => item.userId === recommendation.scopeId);
+    const scope = TELEMETRY_DATA.engineers.find((item) => item.userId === recommendation.scopeId);
     return {
       totalConsumption: scope?.totalConsumption ?? 0,
       overrun: scope?.overrun ?? 0,
@@ -1022,7 +1022,7 @@ function resolveScopeMetrics(recommendation: Recommendation) {
   }
 
   if (recommendation.scopeType === "Use Case") {
-    const scope = KIRO_DATA.useCases.find((item) => item.key === recommendation.scopeId);
+    const scope = TELEMETRY_DATA.useCases.find((item) => item.key === recommendation.scopeId);
     return {
       totalConsumption: scope?.totalConsumption ?? 0,
       overrun: 0,

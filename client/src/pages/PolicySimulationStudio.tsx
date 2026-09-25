@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExperienceHeader } from "@/components/experience/ExperienceHeader";
 import {
-  KIRO_DATA,
+  TELEMETRY_DATA,
   formatConsumption,
   getInteractionsForScope,
   getRecommendationsForScope,
@@ -24,7 +24,7 @@ import {
   type EngineerSummary,
   type InteractionSummary,
   type Recommendation,
-} from "@/lib/kiro-data";
+} from "@/lib/telemetry-data";
 
 type ScopeKind = "Enterprise" | "Cost Center" | "Team" | "Engineer";
 type AdvisorMode =
@@ -118,7 +118,7 @@ const MODEL_TIER_LABELS: Record<SimulationLevers["modelTierCeiling"], string> = 
 };
 
 export default function PolicySimulationStudio() {
-  const initialScopeId = KIRO_DATA.costCenters[0]?.id ?? "enterprise";
+  const initialScopeId = TELEMETRY_DATA.costCenters[0]?.id ?? "enterprise";
   const initialAdvisorMode: AdvisorMode = "Optimization Recommendations";
   const initialLevers = defaultLevers[initialAdvisorMode];
 
@@ -243,9 +243,9 @@ export default function PolicySimulationStudio() {
   return (
     <div className="p-6 md:p-8 max-w-[1640px] mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500">
       <ExperienceHeader
-        eyebrow="Policy Lab"
-        title="Policy & Simulation Studio"
-        lead="Adjust policy levers, compare projected impact, and decide before changing live behavior."
+        eyebrow="Scenario planner"
+        title="Test optimization policies before rollout"
+        lead="Adjust routing and workflow levers, compare projected impact, and inspect assumptions before changing live behavior."
         stats={headerStats}
         journey={studioJourney}
         actions={
@@ -610,7 +610,7 @@ export default function PolicySimulationStudio() {
                   <div>
                     <h3 className="text-sm font-medium text-red-200">Caveat</h3>
                     <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                      Uses observed Kiro telemetry; steering, retrieved context, and instruction overhead remain estimated.
+                      Uses observed AI telemetry; steering, retrieved context, and instruction overhead remain estimated.
                     </p>
                   </div>
                 </div>
@@ -660,32 +660,32 @@ function getScopeOptions(scopeKind: ScopeKind) {
     return [{ id: "enterprise", label: "Enterprise" }];
   }
   if (scopeKind === "Cost Center") {
-    return KIRO_DATA.costCenters.map((costCenter) => ({ id: costCenter.id, label: costCenter.name }));
+    return TELEMETRY_DATA.costCenters.map((costCenter) => ({ id: costCenter.id, label: costCenter.name }));
   }
   if (scopeKind === "Team") {
-    return KIRO_DATA.teams.map((team) => ({ id: team.id, label: `${team.name} · ${team.costCenterName}` }));
+    return TELEMETRY_DATA.teams.map((team) => ({ id: team.id, label: `${team.name} · ${team.costCenterName}` }));
   }
-  return KIRO_DATA.engineers.map((engineer) => ({ id: engineer.userId, label: `${engineer.name} · ${engineer.teamName}` }));
+  return TELEMETRY_DATA.engineers.map((engineer) => ({ id: engineer.userId, label: `${engineer.name} · ${engineer.teamName}` }));
 }
 
 function resolveScope(scopeKind: ScopeKind, scopeId: string) {
   if (scopeKind === "Enterprise") {
     return {
       label: "Enterprise",
-      interactions: KIRO_DATA.interactions,
-      engineers: KIRO_DATA.engineers,
-      recommendations: KIRO_DATA.recommendations,
-      useCases: KIRO_DATA.useCases,
-      totalConsumption: KIRO_DATA.kpis.totalConsumption,
-      overrun: KIRO_DATA.kpis.overrun,
+      interactions: TELEMETRY_DATA.interactions,
+      engineers: TELEMETRY_DATA.engineers,
+      recommendations: TELEMETRY_DATA.recommendations,
+      useCases: TELEMETRY_DATA.useCases,
+      totalConsumption: TELEMETRY_DATA.kpis.totalConsumption,
+      overrun: TELEMETRY_DATA.kpis.overrun,
       affectedScopesLabel: "cost centers",
     };
   }
 
   if (scopeKind === "Cost Center") {
-    const costCenter = KIRO_DATA.costCenters.find((item) => item.id === scopeId) ?? KIRO_DATA.costCenters[0];
+    const costCenter = TELEMETRY_DATA.costCenters.find((item) => item.id === scopeId) ?? TELEMETRY_DATA.costCenters[0];
     const interactions = getInteractionsForScope({ costCenterId: costCenter?.id });
-    const engineers = KIRO_DATA.engineers.filter((engineer) => engineer.costCenterId === costCenter?.id);
+    const engineers = TELEMETRY_DATA.engineers.filter((engineer) => engineer.costCenterId === costCenter?.id);
     return {
       label: costCenter?.name ?? "Cost Center",
       interactions,
@@ -699,9 +699,9 @@ function resolveScope(scopeKind: ScopeKind, scopeId: string) {
   }
 
   if (scopeKind === "Team") {
-    const team = KIRO_DATA.teams.find((item) => item.id === scopeId) ?? KIRO_DATA.teams[0];
+    const team = TELEMETRY_DATA.teams.find((item) => item.id === scopeId) ?? TELEMETRY_DATA.teams[0];
     const interactions = getInteractionsForScope({ teamId: team?.id });
-    const engineers = KIRO_DATA.engineers.filter((engineer) => engineer.teamId === team?.id);
+    const engineers = TELEMETRY_DATA.engineers.filter((engineer) => engineer.teamId === team?.id);
     return {
       label: team ? `${team.name} · ${team.costCenterName}` : "Team",
       interactions,
@@ -714,7 +714,7 @@ function resolveScope(scopeKind: ScopeKind, scopeId: string) {
     };
   }
 
-  const engineer = KIRO_DATA.engineers.find((item) => item.userId === scopeId) ?? KIRO_DATA.engineers[0];
+  const engineer = TELEMETRY_DATA.engineers.find((item) => item.userId === scopeId) ?? TELEMETRY_DATA.engineers[0];
   const interactions = getInteractionsForScope({ engineerId: engineer?.userId });
   const recommendations = [
     ...getRecommendationsForScope("Engineer", engineer?.userId ?? ""),
@@ -845,7 +845,7 @@ function buildSimulation(
     summary,
     affectedScopes:
       scope.affectedScopesLabel === "cost centers"
-        ? KIRO_DATA.costCenters.length
+        ? TELEMETRY_DATA.costCenters.length
         : scope.affectedScopesLabel === "teams"
           ? Math.max(1, Math.min(6, Math.round(promptHeavyInteractions.length / 3)))
           : scope.affectedScopesLabel === "engineers"

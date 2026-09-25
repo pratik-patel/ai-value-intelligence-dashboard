@@ -16,7 +16,7 @@ import { RangeBulletGroup } from "@/components/experience/RangeBullet";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatConsumption, getInteractionById } from "@/lib/kiro-data";
+import { formatConsumption, getInteractionById } from "@/lib/telemetry-data";
 
 interface EvidenceDrawerProps {
   open: boolean;

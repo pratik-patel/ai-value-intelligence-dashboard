@@ -3,7 +3,7 @@ import { ChartConfig } from "@/components/ui/chart";
 // Project Workspace Data
 export const migrationProjects = [
   { id: "MP-2025-001", name: "Global Private Credit Migration", status: "In Progress", progress: 65, source: "Legacy Mainframe (Db2)", target: "Snowflake Cloud Data Platform", owner: "Data Ops Team A", lastUpdated: "2h ago" },
-  { id: "MP-2025-002", name: "Equities Trade History Archival", status: "Completed", progress: 100, source: "On-Prem Oracle", target: "AWS S3 / Glacier", owner: "Compliance IT", lastUpdated: "1d ago" },
+  { id: "MP-2025-002", name: "Equities Trade History Archival", status: "Completed", progress: 100, source: "On-Prem Oracle", target: "Cloud Object Archive", owner: "Compliance IT", lastUpdated: "1d ago" },
   { id: "MP-2025-003", name: "Real Estate Fund Valuation Sync", status: "Planning", progress: 15, source: "Excel / Sharepoint", target: "Anaplan", owner: "Finance Systems", lastUpdated: "4h ago" },
 ];
 

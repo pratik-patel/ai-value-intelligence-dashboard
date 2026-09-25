@@ -17,14 +17,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  KIRO_DATA,
+  TELEMETRY_DATA,
   formatConsumption,
   getInteractionsForScope,
   getRecommendationsForScope,
   getUseCaseSummariesForScope,
   type Recommendation,
   type ReportSummary,
-} from "@/lib/kiro-data";
+} from "@/lib/telemetry-data";
 
 type Audience = "Executive Sponsor" | "Delivery Manager" | "Architect";
 type ScopeType = Recommendation["scopeType"];
@@ -37,13 +37,13 @@ interface ReportEntry extends ReportSummary {
 export default function ReportEvidenceConsole() {
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedReportId, setSelectedReportId] = useState(KIRO_DATA.reports[0]?.id ?? "");
+  const [selectedReportId, setSelectedReportId] = useState(TELEMETRY_DATA.reports[0]?.id ?? "");
   const [evidenceInteractionId, setEvidenceInteractionId] = useState<string | null>(null);
   const [draftScopeId, setDraftScopeId] = useState("enterprise");
   const [draftAudience, setDraftAudience] = useState<Audience>("Executive Sponsor");
   const [draftPeriod, setDraftPeriod] = useState("Last 30 Days");
   const [generatedReports, setGeneratedReports] = useState<ReportEntry[]>(() =>
-    KIRO_DATA.reports.map((report) => ({
+    TELEMETRY_DATA.reports.map((report) => ({
       ...report,
       ...resolveScopeReference(report.scopeLabel),
     })),
@@ -53,17 +53,17 @@ export default function ReportEvidenceConsole() {
     const options = [{ id: "enterprise", label: "Enterprise", scopeType: "Enterprise" as const }];
     return [
       ...options,
-      ...KIRO_DATA.costCenters.map((costCenter) => ({
+      ...TELEMETRY_DATA.costCenters.map((costCenter) => ({
         id: `cost-center:${costCenter.id}`,
         label: `${costCenter.name} · Cost Center`,
         scopeType: "Cost Center" as const,
       })),
-      ...KIRO_DATA.teams.slice(0, 8).map((team) => ({
+      ...TELEMETRY_DATA.teams.slice(0, 8).map((team) => ({
         id: `team:${team.id}`,
         label: `${team.name} · Team`,
         scopeType: "Team" as const,
       })),
-      ...KIRO_DATA.engineers.slice(0, 8).map((engineer) => ({
+      ...TELEMETRY_DATA.engineers.slice(0, 8).map((engineer) => ({
         id: `engineer:${engineer.userId}`,
         label: `${engineer.name} · Engineer`,
         scopeType: "Engineer" as const,
@@ -191,7 +191,7 @@ export default function ReportEvidenceConsole() {
         scopeLabel: dataset.label,
         audience: draftAudience,
         status: "Processing",
-        generatedAt: `${KIRO_DATA.meta.lastUpdated} · ${draftPeriod}`,
+        generatedAt: `${TELEMETRY_DATA.meta.lastUpdated} · ${draftPeriod}`,
         executiveSummary: buildExecutiveSummary(dataset, draftAudience),
         scopeType,
         scopeId,
@@ -284,9 +284,9 @@ export default function ReportEvidenceConsole() {
       ) : null}
 
       <ExperienceHeader
-        eyebrow="Executive Output"
-        title="Reports & Evidence"
-        lead="Choose a report, scan the conclusion, and open the supporting evidence without breaking the decision narrative."
+        eyebrow="Evidence & reporting"
+        title="Trace decisions to source data"
+        lead="Inspect telemetry, confidence, and report conclusions without losing the decision narrative."
         stats={headerStats}
         journey={reportJourney}
         actions={
@@ -391,7 +391,7 @@ export default function ReportEvidenceConsole() {
                     <MetricCard label="Report Status" value={reportReadiness} />
                     <MetricCard label="Evidence Confidence" value={reportConfidence} />
                     <MetricCard label="Decision Owner" value={reportOwner} />
-                    <MetricCard label="Telemetry Freshness" value={KIRO_DATA.meta.freshness.replace("Last updated: ", "")} />
+                    <MetricCard label="Telemetry Freshness" value={TELEMETRY_DATA.meta.freshness.replace("Last updated: ", "")} />
                   </div>
 
                   <div className="rounded-2xl border border-white/5 bg-[#0b1120] p-4">
@@ -606,17 +606,17 @@ function resolveScopeReference(scopeLabel: string): { scopeType: ScopeType; scop
     return { scopeType: "Enterprise", scopeId: "enterprise" };
   }
 
-  const costCenter = KIRO_DATA.costCenters.find((item) => item.name === scopeLabel);
+  const costCenter = TELEMETRY_DATA.costCenters.find((item) => item.name === scopeLabel);
   if (costCenter) {
     return { scopeType: "Cost Center", scopeId: costCenter.id };
   }
 
-  const team = KIRO_DATA.teams.find((item) => item.name === scopeLabel);
+  const team = TELEMETRY_DATA.teams.find((item) => item.name === scopeLabel);
   if (team) {
     return { scopeType: "Team", scopeId: team.id };
   }
 
-  const engineer = KIRO_DATA.engineers.find((item) => item.name === scopeLabel);
+  const engineer = TELEMETRY_DATA.engineers.find((item) => item.name === scopeLabel);
   if (engineer) {
     return { scopeType: "Engineer", scopeId: engineer.userId };
   }
@@ -628,18 +628,18 @@ function resolveScopedDataset(scopeType: ScopeType, scopeId: string) {
   if (scopeType === "Enterprise") {
     return {
       label: "Enterprise",
-      totalConsumption: KIRO_DATA.kpis.totalConsumption,
-      overrun: KIRO_DATA.kpis.overrun,
-      topUseCase: KIRO_DATA.kpis.topUseCase,
-      topModel: KIRO_DATA.costCenters[0]?.topModel ?? "N/A",
-      useCases: KIRO_DATA.useCases,
-      recommendations: KIRO_DATA.recommendations,
-      interactions: KIRO_DATA.interactions,
+      totalConsumption: TELEMETRY_DATA.kpis.totalConsumption,
+      overrun: TELEMETRY_DATA.kpis.overrun,
+      topUseCase: TELEMETRY_DATA.kpis.topUseCase,
+      topModel: TELEMETRY_DATA.costCenters[0]?.topModel ?? "N/A",
+      useCases: TELEMETRY_DATA.useCases,
+      recommendations: TELEMETRY_DATA.recommendations,
+      interactions: TELEMETRY_DATA.interactions,
     };
   }
 
   if (scopeType === "Cost Center") {
-    const costCenter = KIRO_DATA.costCenters.find((item) => item.id === scopeId) ?? KIRO_DATA.costCenters[0];
+    const costCenter = TELEMETRY_DATA.costCenters.find((item) => item.id === scopeId) ?? TELEMETRY_DATA.costCenters[0];
     return {
       label: costCenter?.name ?? "Cost Center",
       totalConsumption: costCenter?.totalConsumption ?? 0,
@@ -653,7 +653,7 @@ function resolveScopedDataset(scopeType: ScopeType, scopeId: string) {
   }
 
   if (scopeType === "Team") {
-    const team = KIRO_DATA.teams.find((item) => item.id === scopeId) ?? KIRO_DATA.teams[0];
+    const team = TELEMETRY_DATA.teams.find((item) => item.id === scopeId) ?? TELEMETRY_DATA.teams[0];
     return {
       label: team?.name ?? "Team",
       totalConsumption: team?.totalConsumption ?? 0,
@@ -666,7 +666,7 @@ function resolveScopedDataset(scopeType: ScopeType, scopeId: string) {
     };
   }
 
-  const engineer = KIRO_DATA.engineers.find((item) => item.userId === scopeId) ?? KIRO_DATA.engineers[0];
+  const engineer = TELEMETRY_DATA.engineers.find((item) => item.userId === scopeId) ?? TELEMETRY_DATA.engineers[0];
   return {
     label: engineer?.name ?? "Engineer",
     totalConsumption: engineer?.totalConsumption ?? 0,

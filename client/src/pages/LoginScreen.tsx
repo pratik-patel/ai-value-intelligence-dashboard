@@ -37,11 +37,11 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_24px_rgba(59,130,246,0.25)]">
                 <Activity className="w-5 h-5" />
               </div>
-              <span className="text-xl font-semibold tracking-tight text-white">Kiro AI Governance</span>
+              <span className="text-xl font-semibold tracking-tight text-white">AI Value Intelligence</span>
             </div>
             <h1 className="dashboard-page-title max-w-xl">Access the executive AI governance workspace.</h1>
             <p className="dashboard-page-lead max-w-2xl">
-              Review posture, ownership, policy controls, evidence, and strategic recommendations from the latest Kiro telemetry snapshot.
+              Review posture, ownership, policy controls, evidence, and strategic recommendations from the latest AI telemetry snapshot.
             </p>
           </div>
         </div>

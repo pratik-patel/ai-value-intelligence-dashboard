@@ -39,7 +39,7 @@ import {
   getTeamById,
   getTeamsForCostCenter,
   getUseCaseSummariesForScope,
-} from "@/lib/kiro-data";
+} from "@/lib/telemetry-data";
 
 export default function DetailWorkspace() {
   const params = useParams<{ entityType: string; entityId: string }>();
@@ -64,7 +64,7 @@ export default function DetailWorkspace() {
 
     interactions.forEach((interaction) => {
       modelMap.set(interaction.modelName, (modelMap.get(interaction.modelName) || 0) + interaction.estimatedCredits);
-      if (interaction.pluginName !== "Direct Kiro") {
+      if (interaction.pluginName !== "Direct Assistant") {
         pluginMap.set(interaction.pluginName, (pluginMap.get(interaction.pluginName) || 0) + interaction.estimatedCredits);
       }
       if (interaction.mcpServer !== "No MCP Invoked") {
@@ -443,7 +443,7 @@ export default function DetailWorkspace() {
           <div className="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6">
             <RankingCard
               title="Plugin Impact"
-              description="Named plugins only, excluding Direct Kiro."
+              description="Named plugins only, excluding Direct Assistant."
               items={modelsAndTools.plugins.map(([label, value]) => ({ label, value: `${formatConsumption(value)} credits` }))}
             />
             <RankingCard
@@ -746,7 +746,7 @@ function OwnershipPanel({
     );
     const pluginItems = Array.from(
       engineerInteractions.reduce((acc, interaction) => {
-        if (interaction.pluginName === "Direct Kiro") return acc;
+        if (interaction.pluginName === "Direct Assistant") return acc;
         acc.set(interaction.pluginName, (acc.get(interaction.pluginName) || 0) + interaction.estimatedCredits);
         return acc;
       }, new Map<string, number>()),
@@ -783,7 +783,7 @@ function OwnershipPanel({
               <div className="flex flex-wrap gap-2">
                 {Object.entries(resolved.engineer.clientMix).map(([key, value]) => (
                   <Badge key={key} className="bg-white/5 text-slate-300 border-white/10">
-                    {key.replace("KIRO_", "")}: {formatPercent(value)}
+                    {key.replace(" ", "")}: {formatPercent(value)}
                   </Badge>
                 ))}
               </div>
@@ -801,7 +801,7 @@ function OwnershipPanel({
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-slate-500">Direct Kiro only</span>
+                      <span className="text-sm text-slate-500">Direct Assistant only</span>
                     )}
                   </div>
                 </div>
@@ -982,7 +982,7 @@ function resolveScope(entityType: string, entityId: string) {
     entityType,
     entityLabel: "Scope",
     title: "Unknown Scope",
-    description: "The selected entity could not be resolved from the Kiro dataset.",
+    description: "The selected entity could not be resolved from the telemetry dataset.",
     scope: {},
     scopeLabel: "",
     recommendationScopeType: "Enterprise" as const,

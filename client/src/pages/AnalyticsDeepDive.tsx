@@ -362,12 +362,12 @@ export default function AnalyticsDeepDive() {
               <div className="border border-white/10 rounded-lg bg-[#0e1526] p-4 flex flex-col shadow-sm">
                 <div className="mb-4">
                   <h3 className="text-sm font-medium text-slate-200">Plugin Usage Impact</h3>
-                  <p className="text-slate-400 text-xs mt-1">Ranked named plugins. "Direct Kiro" shown as metadata only.</p>
+                  <p className="text-slate-400 text-xs mt-1">Ranked named plugins. "Direct Assistant" shown as metadata only.</p>
                 </div>
                 <div className="flex-1 min-h-0 space-y-4">
                   <div>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-200 font-medium">AWS Docs</span>
+                      <span className="text-slate-200 font-medium">Knowledge Search</span>
                       <span className="text-slate-400">446.8 cr · 25%</span>
                     </div>
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
@@ -385,7 +385,7 @@ export default function AnalyticsDeepDive() {
                   </div>
                   <div className="pt-4 border-t border-white/5 mt-4">
                      <div className="text-[10px] uppercase text-slate-500 font-medium mb-2">Metadata - Not Ranked</div>
-                     <div className="text-xs text-slate-400">Direct Kiro <span className="text-slate-500">(912.5 cr)</span></div>
+                     <div className="text-xs text-slate-400">Direct Assistant <span className="text-slate-500">(912.5 cr)</span></div>
                   </div>
                 </div>
               </div>
@@ -399,7 +399,7 @@ export default function AnalyticsDeepDive() {
                 <div className="flex-1 min-h-0 space-y-4">
                   <div>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-200 font-medium">aws-docs</span>
+                      <span className="text-slate-200 font-medium">knowledge-search</span>
                       <span className="text-slate-400">459.5 cr · 26%</span>
                     </div>
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
@@ -514,7 +514,7 @@ export default function AnalyticsDeepDive() {
                         <td className="px-6 py-4">Sam Walker</td>
                         <td className="px-6 py-4 text-slate-400">platform-hardening</td>
                         <td className="px-6 py-4 text-slate-400">Claude Sonnet 4.6</td>
-                        <td className="px-6 py-4 text-slate-400">Direct Kiro</td>
+                        <td className="px-6 py-4 text-slate-400">Direct Assistant</td>
                         <td className="px-6 py-4 text-slate-400">No MCP</td>
                         <td className="px-6 py-4">
                            <div className="flex items-center justify-center gap-2 text-slate-400 bg-white/5 rounded px-2 py-1 w-fit mx-auto border border-white/5">
@@ -535,8 +535,8 @@ export default function AnalyticsDeepDive() {
                         <td className="px-6 py-4">Sam Walker</td>
                         <td className="px-6 py-4 text-slate-400">platform-hardening</td>
                         <td className="px-6 py-4 text-slate-400">Auto</td>
-                        <td className="px-6 py-4 text-slate-400">Direct Kiro</td>
-                        <td className="px-6 py-4 text-slate-400">aws-docs</td>
+                        <td className="px-6 py-4 text-slate-400">Direct Assistant</td>
+                        <td className="px-6 py-4 text-slate-400">knowledge-search</td>
                         <td className="px-6 py-4">
                            <div className="flex items-center justify-center gap-2 text-slate-400 bg-white/5 rounded px-2 py-1 w-fit mx-auto border border-white/5">
                              <div className="flex items-center gap-1"><BookOpen className="w-3 h-3 text-slate-500" /> <span className="text-xs">2</span></div>

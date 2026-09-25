@@ -1,875 +1,276 @@
-import { useState } from "react";
-import { AlertTriangle, ArrowUpRight, Check, Compass, Sparkles, X, Zap } from "lucide-react";
 import { Link } from "wouter";
+import {
+  ArrowRight,
+  BadgeDollarSign,
+  Bot,
+  CheckCircle2,
+  CircleDollarSign,
+  Gauge,
+  Info,
+  Lightbulb,
+  Network,
+  Sparkles,
+  Target,
+  Users,
+  Workflow,
+} from "lucide-react";
 import {
   CartesianGrid,
   Cell,
+  ComposedChart,
   Legend,
   Line,
-  LineChart,
+  ReferenceLine,
   ResponsiveContainer,
+  Scatter,
+  ScatterChart,
   Tooltip,
-  Treemap,
   XAxis,
   YAxis,
 } from "recharts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExperienceHeader } from "@/components/experience/ExperienceHeader";
-import { IntensityMatrix } from "@/components/experience/IntensityMatrix";
-import { SignalRing } from "@/components/experience/SignalRing";
-import { KIRO_DATA, formatConsumption } from "@/lib/kiro-data";
+import { TELEMETRY_DATA, formatConsumption } from "@/lib/telemetry-data";
 
-const TREEMAP_COLORS = ["#1D4ED8", "#4F46E5", "#0F766E", "#0369A1", "#7C3AED", "#2563EB"];
+const demoEfficiency = [
+  { name: "Payments Platform", usage: 82, outcome: 91, quadrant: "Efficient exemplar" },
+  { name: "Customer Experience", usage: 68, outcome: 76, quadrant: "Efficient exemplar" },
+  { name: "Risk Automation", usage: 91, outcome: 86, quadrant: "High investment / high output" },
+  { name: "Data Foundations", usage: 74, outcome: 60, quadrant: "Optimization opportunity" },
+  { name: "Service Operations", usage: 49, outcome: 55, quadrant: "Developing adoption" },
+];
 
-type OverviewMetricCard = {
-  label: string;
-  value: string;
-  hint: string;
-  href: string;
-  tone?: "default" | "amber";
+const opportunityTone: Record<string, string> = {
+  High: "border-amber-400/25 bg-amber-400/10 text-amber-200",
+  Medium: "border-sky-400/20 bg-sky-400/10 text-sky-200",
+  Low: "border-slate-400/20 bg-slate-400/10 text-slate-300",
 };
-
-type OverviewSummaryChip = {
-  label: string;
-  value: string;
-  href?: string;
-};
-
-type OverviewInsight = {
-  title: string;
-  metric: string;
-  detail: string;
-  href: string;
-  emphasis?: "default" | "alert";
-};
-
-function formatChartDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(`${value}T00:00:00`));
-}
-
-function formatChartValue(value: number) {
-  return `${value.toFixed(1).replace(".0", "")} credits`;
-}
-
-function wrapTreemapLabel(name: string, maxLineLength: number) {
-  const words = name.split(" ");
-  const lines: string[] = [];
-  let currentLine = "";
-
-  words.forEach((word) => {
-    const nextLine = currentLine ? `${currentLine} ${word}` : word;
-    if (nextLine.length <= maxLineLength) {
-      currentLine = nextLine;
-      return;
-    }
-
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-    currentLine = word;
-  });
-
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-
-  return lines;
-}
-
-function TreemapTile(props: {
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-  name?: string;
-  size?: number;
-  fill?: string;
-}) {
-  const { x = 0, y = 0, width = 0, height = 0, name = "", size = 0, fill = "#1D4ED8" } = props;
-
-  if (width <= 0 || height <= 0) {
-    return null;
-  }
-
-  const horizontalPadding = width > 220 ? 18 : 14;
-  const verticalPadding = height > 140 ? 18 : 14;
-  const maxLineLength = width > 260 ? 26 : width > 200 ? 20 : width > 150 ? 16 : 13;
-  const labelLines = wrapTreemapLabel(name, maxLineLength).slice(0, height > 150 ? 3 : 2);
-  const canShowSpend = width >= 190 && height >= 90;
-  const nameFontSize = width > 320 ? 16 : width > 240 ? 15 : width > 180 ? 13 : 12;
-  const lineHeight = nameFontSize + 4;
-  const labelBlockHeight = labelLines.length * lineHeight;
-  const spendY = y + verticalPadding + labelBlockHeight + (canShowSpend ? 18 : 0);
-
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        rx={12}
-        ry={12}
-        fill={fill}
-        stroke="rgba(255,255,255,0.08)"
-        strokeWidth={1}
-      />
-      {labelLines.map((line, index) => (
-        <text
-          key={`${name}-${line}-${index}`}
-          x={x + horizontalPadding}
-          y={y + verticalPadding + index * lineHeight}
-          fill="#e2e8f0"
-          fontSize={nameFontSize}
-          fontWeight={index === 0 ? 600 : 500}
-          dominantBaseline="hanging"
-        >
-          {line}
-        </text>
-      ))}
-      {canShowSpend && (
-        <text
-          x={x + horizontalPadding}
-          y={spendY}
-          fill="rgba(226,232,240,0.78)"
-          fontSize={12}
-          fontWeight={500}
-          dominantBaseline="hanging"
-        >
-          {formatConsumption(size)} credits
-        </text>
-      )}
-    </g>
-  );
-}
 
 export default function GovernanceOverview() {
-  const [isGovernanceBannerVisible, setIsGovernanceBannerVisible] = useState(true);
+  const totalUsage = TELEMETRY_DATA.kpis.totalConsumption;
+  const budget = Math.max(totalUsage - TELEMETRY_DATA.kpis.overrun, totalUsage * 0.82);
+  const budgetVariance = budget ? ((totalUsage - budget) / budget) * 100 : 0;
+  const portfolios = TELEMETRY_DATA.costCenters
+    .slice()
+    .sort((a, b) => b.totalConsumption - a.totalConsumption)
+    .slice(0, 5);
+  const maxPortfolioUsage = portfolios[0]?.totalConsumption ?? 1;
+  const topActions = TELEMETRY_DATA.recommendations.slice(0, 3);
 
-  const treemapData = KIRO_DATA.costCenters.map((costCenter, index) => ({
-    name: costCenter.name,
-    size: Number(costCenter.totalConsumption.toFixed(2)),
-    fill: TREEMAP_COLORS[index % TREEMAP_COLORS.length],
-  }));
+  const trend = TELEMETRY_DATA.dailyTrend.map((entry, index, entries) => {
+    const max = Math.max(...entries.map((item) => item.consumption), 1);
+    return {
+      date: entry.date,
+      usage: Math.round((entry.consumption / max) * 100),
+      outcome: Math.round(58 + index * 1.3 + Math.sin(index / 2.5) * 8),
+    };
+  });
 
-  const topRecommendations = KIRO_DATA.recommendations.slice(0, 4);
-  const highSeverityRecommendations = KIRO_DATA.recommendations.filter(
-    (recommendation) => recommendation.severity === "High",
-  );
-  const { adoptedLicenses, idleThresholdDays, otherActiveAlerts, totalLicenses, unusedLicenses } =
-    KIRO_DATA.licenseSummary;
-  const hasUnusedLicenses = unusedLicenses > 0;
-  const leadRecommendation = topRecommendations[0];
-  const supportingRecommendations = topRecommendations.slice(1, 4);
-  const aiDeliveryCostCenterId = KIRO_DATA.costCenters[0]?.id ?? "CC-4402";
-  const aiDeliveryCostCenterName = KIRO_DATA.costCenters[0]?.name ?? "Loan Origination Operations";
-  const aiDeliveryTeamSplits = KIRO_DATA.teams
-    .filter((team) => team.costCenterId === aiDeliveryCostCenterId)
-    .sort((left, right) => right.totalConsumption - left.totalConsumption)
-    .map((team) => ({
-      name: team.name,
-      credits: team.totalConsumption,
-      engineers: team.activeEngineers,
-      href: `/detail/cost-center/${aiDeliveryCostCenterId}`,
-    }));
-  const aiDeliveryCostCenterCredits = aiDeliveryTeamSplits.reduce((sum, team) => sum + team.credits, 0);
-
-  const peakDailyConsumption = KIRO_DATA.dailyTrend.reduce(
-    (currentPeak, entry) => (entry.consumption > currentPeak.consumption ? entry : currentPeak),
-    KIRO_DATA.dailyTrend[0],
-  );
-  const peakDailyOverrun = KIRO_DATA.dailyTrend.reduce(
-    (currentPeak, entry) => (entry.overrun > currentPeak.overrun ? entry : currentPeak),
-    KIRO_DATA.dailyTrend[0],
-  );
-
-  const executiveKpis: OverviewMetricCard[] = [
-    {
-      label: "Total AI Consumption",
-      value: `${formatConsumption(KIRO_DATA.kpis.totalConsumption)} credits`,
-      hint: "Enterprise credits",
-      href: "/explorer",
-    },
-    {
-      label: "Overrun",
-      value: `${formatConsumption(KIRO_DATA.kpis.overrun)} credits`,
-      hint: "Current overage",
-      href: "/recommendations",
-      tone: "amber",
-    },
-    {
-      label: "Active License Adoption",
-      value: `${adoptedLicenses} / ${totalLicenses}`,
-      hint: `${unusedLicenses} idle licenses`,
-      href: "/recommendations",
-    },
-    {
-      label: "Priority Risks",
-      value: String(highSeverityRecommendations.length),
-      hint: "High-severity findings",
-      href: "/recommendations",
-    },
-  ];
-
-  const secondarySummary: OverviewSummaryChip[] = [
-    {
-      label: "Active Engineers",
-      value: String(KIRO_DATA.kpis.activeEngineers),
-      href: "/explorer",
-    },
-    {
-      label: "Consumption / Engineer",
-      value: `${formatConsumption(KIRO_DATA.kpis.consumptionPerEngineer)} credits`,
-      href: "/explorer",
-    },
-    {
-      label: "Other Active Alerts",
-      value: String(otherActiveAlerts),
-      href: "/recommendations",
-    },
-    {
-      label: "Advisor Runs",
-      value: String(KIRO_DATA.runs.length),
-      href: "/reports",
-    },
-  ];
-
-  const insightCards: OverviewInsight[] = [
-    {
-      title: "Top Cost Center",
-      metric: aiDeliveryCostCenterName,
-      detail: `${formatConsumption(aiDeliveryCostCenterCredits)} credits`,
-      href: `/detail/cost-center/${aiDeliveryCostCenterId}`,
-    },
-    {
-      title: "Lead Team in Cost Center",
-      metric: aiDeliveryTeamSplits[0]?.name ?? "Origination Workflow Squad",
-      detail: `${formatConsumption(aiDeliveryTeamSplits[0]?.credits ?? 0)} credits`,
-      href: `/detail/cost-center/${aiDeliveryCostCenterId}`,
-    },
-    {
-      title: "Top Use Case",
-      metric: KIRO_DATA.kpis.topUseCase,
-      detail: `${formatConsumption(KIRO_DATA.useCases[0]?.totalConsumption ?? 0)} credits`,
-      href: "/explorer",
-    },
-    {
-      title: "Top Risk Signal",
-      metric: leadRecommendation?.title ?? "Review concentration risk",
-      detail: `${topRecommendations.length} priority actions`,
-      href: "/recommendations",
-      emphasis: "alert",
-    },
-  ];
-  const clientMixColumns = [
-    { key: "ide", label: "IDE" },
-    { key: "cli", label: "CLI" },
-    { key: "plugin", label: "Plugin" },
-  ];
-  const clientMixRows = KIRO_DATA.clientMixByCostCenter.map((item) => ({
-    key: item.name,
-    label: item.name,
-    summary: `${item.ide + item.cli + item.plugin} requests`,
-    cells: clientMixColumns.map((column) => ({
-      key: column.key,
-      value: Number(item[column.key as keyof typeof item] ?? 0),
-      displayValue: String(item[column.key as keyof typeof item] ?? 0),
-    })),
-  }));
-  const governancePressureItems = [
-    {
-      label: "High Severity",
-      value: highSeverityRecommendations.length,
-      color: "#f97316",
-      note: "Leadership interventions that should not wait for another reporting cycle.",
-    },
-    {
-      label: "Idle Licenses",
-      value: unusedLicenses,
-      color: "#38bdf8",
-      note: "Licenses not producing current value and ready for reassignment or cleanup.",
-    },
-    {
-      label: "Active Alerts",
-      value: otherActiveAlerts,
-      color: "#818cf8",
-      note: "Additional system signals that support the current governance posture.",
-    },
-  ];
-
-  const headerStats = [
-    {
-      label: "Cost Pressure",
-      value: `${formatConsumption(KIRO_DATA.kpis.overrun)} credits`,
-      note: `${highSeverityRecommendations.length} high-severity signals are linked to active overrun.`,
-    },
-    {
-      label: "License Readiness",
-      value: `${adoptedLicenses}/${totalLicenses} active`,
-      note: `${unusedLicenses} seats have been idle beyond the ${idleThresholdDays}-day threshold.`,
-    },
-    {
-      label: "Top Ownership Hotspot",
-      value: aiDeliveryCostCenterName,
-      note: `${formatConsumption(aiDeliveryCostCenterCredits)} credits across ${aiDeliveryTeamSplits.length} lead teams.`,
-    },
-    {
-      label: "Next Move",
-      value: leadRecommendation?.type ?? "Governance Review",
-      note: leadRecommendation?.title ?? "Review concentration risk and open the guided explorer path.",
-    },
-  ];
-
-  const journey = [
-    {
-      label: "Detect",
-      detail: "Surface overrun, unused capacity, and concentration before they spread.",
-      state: "active" as const,
-    },
-    {
-      label: "Explain",
-      detail: "Follow the highest-pressure cost center into the teams and engineers driving it.",
-      state: "upcoming" as const,
-    },
-    {
-      label: "Prioritize",
-      detail: "Move into the ranked intervention queue with evidence already attached.",
-      state: "upcoming" as const,
-    },
-    {
-      label: "Act",
-      detail: "Simulate policy changes and package the outcome into a report.",
-      state: "upcoming" as const,
-    },
-  ];
+  const toolMix = buildWorkflowMix();
+  const reasoningFit = buildReasoningFit();
 
   return (
-    <div className="p-8 max-w-[1680px] mx-auto space-y-6 animate-in fade-in duration-500">
-      <ExperienceHeader
-        eyebrow="Governance Control Tower"
-        title="Kiro AI Consumption Governance"
-        lead="Executive posture for Kiro consumption, license efficiency, and the next actions most likely to reduce overrun."
-        stats={headerStats}
-        journey={journey}
-        actions={
-          <>
-            <Link href="/reports">
-              <Button variant="outline" className="bg-black/20 border-white/10 hover:bg-white/5 hover:text-white">
-                <Sparkles className="w-4 h-4 mr-2 text-indigo-300" />
-                Generate Strategic Report
-              </Button>
-            </Link>
-            <Link href="/studio">
-              <Button className="bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/40 shadow-[0_0_20px_rgba(37,99,235,0.18)]">
-                <Zap className="w-4 h-4 mr-2" />
-                Run AI Advisor
-              </Button>
-            </Link>
-          </>
-        }
-      />
+    <div className="mx-auto max-w-[1600px] space-y-6 px-5 py-7 lg:px-8 lg:py-8">
+      <section className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-4xl">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <Badge className="border-cyan-400/20 bg-cyan-400/10 text-cyan-200 hover:bg-cyan-400/10">Enterprise overview</Badge>
+            <Badge variant="outline" className="border-white/10 text-slate-400">Sample dataset</Badge>
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-white lg:text-3xl">Turn AI usage into measurable delivery value.</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+            Usage is <span className="font-medium text-amber-200">{Math.abs(budgetVariance).toFixed(1)}% above the modeled plan</span> while delivery outcome coverage is incomplete. The clearest opportunity is right-sizing high-reasoning models in the highest-volume portfolios.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/efficiency">
+            <Button variant="outline" className="border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]">Review efficiency</Button>
+          </Link>
+          <Link href="/recommendations">
+            <Button className="bg-cyan-500 text-slate-950 hover:bg-cyan-400">View top actions <ArrowRight className="ml-2 h-4 w-4" /></Button>
+          </Link>
+        </div>
+      </section>
 
-      {isGovernanceBannerVisible && (
-        <Card
-          className={
-            hasUnusedLicenses
-              ? "bg-amber-500/8 border-amber-500/18 shadow-lg"
-              : "bg-blue-500/8 border-blue-500/18 shadow-lg"
-          }
-        >
-          <CardContent className="pt-5">
-            <div className="flex items-start justify-between gap-4">
-              <Link href="/recommendations">
-                <div className="flex items-start gap-3 cursor-pointer">
-                  <div
-                    className={
-                      hasUnusedLicenses
-                        ? "mt-0.5 rounded-full bg-amber-500/12 p-2 text-amber-300"
-                        : "mt-0.5 rounded-full bg-blue-500/12 p-2 text-blue-300"
-                    }
-                  >
-                    <AlertTriangle className="w-4 h-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span className={`dashboard-eyebrow ${hasUnusedLicenses ? "text-amber-300" : "text-blue-300"}`}>
-                        {hasUnusedLicenses ? "Governance Warning" : "Governance Signal"}
-                      </span>
-                      <span className={`text-sm font-medium ${hasUnusedLicenses ? "text-amber-100" : "text-blue-100"}`}>
-                        System Advice
-                      </span>
+      <section className="grid overflow-hidden rounded-2xl border border-white/10 bg-[#0b1625]/85 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCell icon={Gauge} label="AI usage" value={`${formatConsumption(totalUsage)} units`} detail="Observed · current period" delta="+12.4%" tone="amber" />
+        <KpiCell icon={CircleDollarSign} label="Budget position" value={`${formatConsumption(TELEMETRY_DATA.kpis.overrun)} over`} detail="Estimated · modeled plan" delta={`+${budgetVariance.toFixed(1)}%`} tone="amber" />
+        <KpiCell icon={Users} label="Sustained adoption" value={`${TELEMETRY_DATA.kpis.activeEngineers} users`} detail="Observed · active users" delta="74% eligible" tone="green" />
+        <KpiCell icon={BadgeDollarSign} label="Estimated ROI" value="Awaiting data" detail="Connect work + finance systems" delta="Not scored" tone="muted" />
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.45fr_1fr]">
+        <Panel title="Usage and delivery are not yet moving together" description="Normalized trend (0–100). Delivery is illustrative until a work-management source is connected." badge="Mixed sources">
+          <div className="h-[280px] pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={trend} margin={{ top: 8, right: 16, left: -12, bottom: 8 }}>
+                <CartesianGrid stroke="rgba(148,163,184,0.10)" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="date" tickFormatter={(value) => new Date(`${value}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })} tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={30} />
+                <YAxis domain={[0, 110]} tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "#0b1625", border: "1px solid rgba(255,255,255,.12)", borderRadius: 10 }} labelStyle={{ color: "#cbd5e1" }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8" }} />
+                <Line type="monotone" dataKey="usage" name="Usage index" stroke="#22d3ee" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="outcome" name="Delivery index · illustrative" stroke="#a78bfa" strokeWidth={2.5} strokeDasharray="6 5" dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+
+        <Panel title="Value by portfolio" description="Ranked by usage. Add delivery outcomes to rank by cost per successful outcome." badge="Top 5">
+          <div className="space-y-3">
+            {portfolios.map((portfolio, index) => (
+              <Link key={portfolio.id} href={`/detail/cost-center/${portfolio.id}`} className="group block rounded-xl border border-white/[0.07] bg-white/[0.025] p-3.5 hover:border-cyan-400/20 hover:bg-white/[0.045]">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-xs font-semibold text-slate-400">{index + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="truncate text-sm font-medium text-slate-200">{portfolio.name}</p>
+                      <span className="whitespace-nowrap text-xs text-slate-400">{formatConsumption(portfolio.totalConsumption)} units</span>
                     </div>
-                    <p className="dashboard-body text-slate-200">
-                      {hasUnusedLicenses
-                        ? `${unusedLicenses} current licenses have been idle for more than ${idleThresholdDays} days.`
-                        : `${adoptedLicenses} / ${totalLicenses} active licenses show recent usage.`}
-                      {otherActiveAlerts > 0 ? ` (+ ${otherActiveAlerts} other active alerts)` : ""}
-                    </p>
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" style={{ width: `${(portfolio.totalConsumption / maxPortfolioUsage) * 100}%` }} />
+                    </div>
+                    <p className="mt-2 text-[11px] text-slate-500">{portfolio.teamCount} teams · {portfolio.activeEngineers} users · {portfolio.topUseCase}</p>
                   </div>
+                  <ArrowRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-cyan-300" />
                 </div>
               </Link>
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-white/10 bg-black/20 hover:bg-white/5 hover:text-white"
-                  onClick={() => setIsGovernanceBannerVisible(false)}
-                >
-                  <Check className="w-3.5 h-3.5 mr-2" />
-                  Acknowledge
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-slate-400 hover:text-white hover:bg-white/5"
-                  onClick={() => setIsGovernanceBannerVisible(false)}
-                  aria-label="Close governance signal"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+            ))}
+          </div>
+          <Link href="/explorer" className="mt-4 inline-flex items-center text-xs font-medium text-cyan-300 hover:text-cyan-200">Explore enterprise → portfolio → team → user <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link>
+        </Panel>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-2">
+        <Panel title="Efficiency frontier" description="Find patterns worth scaling—not a user leaderboard. Outcome values are illustrative and cohort normalization is required." badge="Illustrative">
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 14, right: 18, bottom: 28, left: 2 }}>
+                <CartesianGrid stroke="rgba(148,163,184,0.10)" strokeDasharray="4 4" />
+                <XAxis type="number" dataKey="usage" name="Usage index" domain={[35, 100]} tick={{ fill: "#64748b", fontSize: 11 }} label={{ value: "AI usage index →", position: "insideBottom", offset: -16, fill: "#64748b", fontSize: 11 }} />
+                <YAxis type="number" dataKey="outcome" name="Delivery index" domain={[40, 100]} tick={{ fill: "#64748b", fontSize: 11 }} label={{ value: "Delivery outcome →", angle: -90, position: "insideLeft", fill: "#64748b", fontSize: 11 }} />
+                <ReferenceLine x={70} stroke="#334155" strokeDasharray="4 4" />
+                <ReferenceLine y={70} stroke="#334155" strokeDasharray="4 4" />
+                <Tooltip cursor={{ strokeDasharray: "4 4" }} contentStyle={{ background: "#0b1625", border: "1px solid rgba(255,255,255,.12)", borderRadius: 10 }} formatter={(value: number, name: string) => [value, name]} />
+                <Scatter data={demoEfficiency} fill="#22d3ee">
+                  {demoEfficiency.map((item) => <Cell key={item.name} fill={item.quadrant === "Optimization opportunity" ? "#f59e0b" : item.quadrant === "Efficient exemplar" ? "#34d399" : "#38bdf8"} />)}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap gap-2 text-[11px] text-slate-400">
+            <LegendKey color="bg-emerald-400" label="Efficient exemplar" />
+            <LegendKey color="bg-sky-400" label="Healthy / developing" />
+            <LegendKey color="bg-amber-400" label="Optimization opportunity" />
+          </div>
+        </Panel>
+
+        <Panel title="Why usage is changing" description="Model fit and workflow attribution explain the largest optimization levers." badge="Estimated">
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-200"><Target className="h-4 w-4 text-violet-300" />Reasoning fit</div>
+                <span className="text-xs text-slate-500">Classified runs</span>
+              </div>
+              <div className="flex h-3 overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="bg-emerald-400" style={{ width: `${reasoningFit.rightSized}%` }} />
+                <div className="bg-amber-400" style={{ width: `${reasoningFit.overpowered}%` }} />
+                <div className="bg-rose-400" style={{ width: `${reasoningFit.underpowered}%` }} />
+              </div>
+              <div className="mt-4 space-y-2.5 text-xs">
+                <MetricRow label="Right-sized" value={`${reasoningFit.rightSized}%`} tone="text-emerald-300" />
+                <MetricRow label="Potentially overpowered" value={`${reasoningFit.overpowered}%`} tone="text-amber-300" />
+                <MetricRow label="Potentially underpowered" value={`${reasoningFit.underpowered}%`} tone="text-rose-300" />
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
-        {executiveKpis.map((item) => (
-          <KpiCard key={item.label} label={item.label} value={item.value} hint={item.hint} href={item.href} tone={item.tone} />
-        ))}
-      </div>
-
-      <div className="rounded-2xl border border-white/6 bg-[#0d1526] px-4 py-3">
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {secondarySummary.map((item) => (
-            <SummaryChip key={item.label} label={item.label} value={item.value} href={item.href} />
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="dashboard-eyebrow">Drill-Down Insights</p>
-            <h2 className="dashboard-section-title mt-1">Ownership, spend, and action hotspots</h2>
-          </div>
-          <Link href="/explorer">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
-              Open Explorer
-              <ArrowUpRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 items-start">
-          {insightCards.map((item) => (
-            <OverviewTile
-              key={item.title}
-              title={item.title}
-              metric={item.metric}
-              detail={item.detail}
-              href={item.href}
-              emphasis={item.emphasis}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-[1.28fr_0.92fr] gap-6 items-start">
-        <div className="space-y-6">
-          <Card className="bg-[#111827] border-white/5 shadow-lg overflow-hidden">
-            <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <CardTitle className="dashboard-card-title text-slate-200">Daily AI Consumption Trend</CardTitle>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge className="bg-blue-500/10 text-blue-200 border-blue-500/20">
-                  Peak consumption: {formatConsumption(peakDailyConsumption.consumption)} on {formatChartDate(peakDailyConsumption.date)}
-                </Badge>
-                <Badge className="bg-amber-500/10 text-amber-200 border-amber-500/20">
-                  Peak overrun: {formatConsumption(peakDailyOverrun.overrun)} on {formatChartDate(peakDailyOverrun.date)}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="h-[360px] border-t border-white/5 bg-[#0c1220]/50 pt-5">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={KIRO_DATA.dailyTrend} margin={{ top: 12, right: 18, left: 4, bottom: 38 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <Legend
-                    verticalAlign="top"
-                    align="right"
-                    iconType="circle"
-                    wrapperStyle={{ paddingBottom: "12px", fontSize: "12px", color: "#94a3b8" }}
-                  />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickFormatter={formatChartDate}
-                    angle={-35}
-                    textAnchor="end"
-                    height={58}
-                    tickMargin={10}
-                    minTickGap={14}
-                    label={{ value: "Date", position: "insideBottom", dy: 32, fill: "#94A3B8", fontSize: 12 }}
-                  />
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickFormatter={(value) => formatConsumption(Number(value))}
-                    width={52}
-                    label={{ value: "Credits", angle: -90, position: "insideLeft", fill: "#94A3B8", fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px" }}
-                    itemStyle={{ color: "#e2e8f0" }}
-                    labelFormatter={(value) => formatChartDate(String(value))}
-                    formatter={(value: number, name: string) => [
-                      formatChartValue(Number(value)),
-                      name === "Consumption" ? "Consumption" : "Overrun",
-                    ]}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="consumption"
-                    stroke="#3b82f6"
-                    strokeWidth={3}
-                    dot={false}
-                    activeDot={{ r: 7, fill: "#3b82f6", stroke: "#e2e8f0", strokeWidth: 2 }}
-                    name="Consumption"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="overrun"
-                    stroke="#f59e0b"
-                    strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{ r: 7, fill: "#f59e0b", stroke: "#f8fafc", strokeWidth: 2 }}
-                    name="Overrun"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            <Card className="bg-[#111827] border-white/5 shadow-lg">
-              <CardHeader>
-                <CardTitle className="dashboard-card-title text-slate-200">Spend Concentration</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[280px] border-t border-white/5 bg-[#0c1220]/50 pt-6">
-                <ResponsiveContainer width="100%" height="100%">
-                  <Treemap
-                    data={treemapData}
-                    dataKey="size"
-                    aspectRatio={4 / 3}
-                    stroke="rgba(255,255,255,0.08)"
-                    content={<TreemapTile />}
-                  >
-                    {treemapData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.fill} />
-                    ))}
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.1)", borderRadius: "8px" }}
-                      itemStyle={{ color: "#e2e8f0" }}
-                      formatter={(value: number) => [`${formatConsumption(Number(value))} credits`, "Spend"]}
-                    />
-                  </Treemap>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <SignalRing
-              title="Governance Pressure Mix"
-              centerLabel="priority signals"
-              centerValue={String(governancePressureItems.reduce((sum, item) => sum + item.value, 0))}
-              items={governancePressureItems}
-            />
-          </div>
-
-          <IntensityMatrix
-            title="Client Type x Cost Center Activity"
-            description="A denser view of where IDE, CLI, and plugin activity are actually concentrating across the enterprise."
-            columns={clientMixColumns}
-            rows={clientMixRows}
-          />
-
-          <Card className="bg-[#111827] border-white/5 shadow-lg overflow-hidden">
-            <CardHeader className="bg-black/20 border-b border-white/5">
-              <CardTitle className="dashboard-card-title text-slate-200">Next Ownership Queues</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5 items-start">
-                <RankedList
-                  title="Cost Centers"
-                  items={KIRO_DATA.costCenters.slice(1, 4).map((item) => ({
-                    id: item.id,
-                    label: item.name,
-                    amount: item.totalConsumption,
-                    value: `${formatConsumption(item.totalConsumption)} credits`,
-                    href: `/detail/cost-center/${item.id}`,
-                  }))}
-                />
-                <RankedList
-                  title="Lead Teams"
-                  items={aiDeliveryTeamSplits.map((item) => ({
-                    id: item.name,
-                    label: item.name,
-                    amount: item.credits,
-                    value: `${formatConsumption(item.credits)} credits`,
-                    href: item.href,
-                  }))}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card className="bg-gradient-to-br from-[#1a1646] via-[#141c33] to-[#0b1222] border-indigo-500/20 shadow-[0_20px_60px_rgba(30,41,59,0.45)] overflow-hidden">
-            <CardHeader className="pb-3">
-              <CardTitle className="dashboard-card-title text-indigo-200 flex items-center">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Executive Brief
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="rounded-2xl border border-indigo-400/15 bg-black/20 p-4">
-                <p className="dashboard-eyebrow text-indigo-200">Top Recommendation</p>
-                <p className="mt-2 text-lg font-semibold leading-tight text-white text-balance">
-                  {leadRecommendation?.title ?? "Review concentration risk"}
-                </p>
-                <p className="dashboard-muted-body mt-3 text-pretty">
-                  {leadRecommendation?.expectedImpact ?? "Use the top drill paths to reduce overrun and improve governance posture."}
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                <BriefSignal
-                  label="Scope"
-                  value={leadRecommendation?.scopeLabel ?? "Enterprise"}
-                  note={leadRecommendation?.type ?? "Governance review"}
-                />
-                <BriefSignal
-                  label="Linked Evidence"
-                  value={`${leadRecommendation?.evidenceInteractionIds.length ?? 0} interactions`}
-                  note="Ready for inspection"
-                />
-              </div>
-              <div className="rounded-2xl border border-white/6 bg-black/20 p-4">
-                <p className="dashboard-eyebrow mb-2">Next Move</p>
-                <p className="dashboard-body text-slate-100 text-pretty">
-                  Open <span className="font-medium text-white">{aiDeliveryCostCenterName}</span> in Explorer, then follow the
-                  top use case into the highest-cost engineer interactions.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/explorer">
-                  <Button className="bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/40">
-                    <Compass className="w-4 h-4 mr-2" />
-                    Open Guided Explorer
-                  </Button>
-                </Link>
-                <Link href="/recommendations">
-                  <Button variant="outline" className="border-white/10 bg-black/20 hover:bg-white/5 hover:text-white">
-                    Review Recommendations
-                    <ArrowUpRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-[#111827] border-white/5 shadow-lg">
-            <CardHeader className="bg-black/20 border-b border-white/5">
-              <CardTitle className="dashboard-card-title text-slate-200">Supporting Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-white/5 p-0">
-              {supportingRecommendations.map((recommendation) => (
-                <Link key={recommendation.id} href="/recommendations">
-                  <div className="p-4 hover:bg-white/[0.02] transition-colors cursor-pointer">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge
-                            className={
-                              recommendation.severity === "High"
-                                ? "bg-red-500/10 text-red-300 border-red-500/20"
-                                : recommendation.severity === "Medium"
-                                  ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
-                                  : "bg-blue-500/10 text-blue-300 border-blue-500/20"
-                            }
-                          >
-                            {recommendation.severity}
-                          </Badge>
-                          <Badge className="bg-white/5 text-slate-300 border-white/10">{recommendation.type}</Badge>
-                        </div>
-                        <p className="dashboard-item-title text-balance">{recommendation.title}</p>
-                        <p className="dashboard-muted-body mt-1">{recommendation.scopeLabel}</p>
-                      </div>
-                      <ArrowUpRight className="w-4 h-4 text-slate-500 shrink-0" />
-                    </div>
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-200"><Workflow className="h-4 w-4 text-cyan-300" />Workflow attribution</div>
+              <div className="space-y-3">
+                {toolMix.slice(0, 4).map((item) => (
+                  <div key={item.label}>
+                    <div className="mb-1.5 flex justify-between text-xs"><span className="text-slate-400">{item.label}</span><span className="text-slate-300">{item.share}%</span></div>
+                    <div className="h-1.5 rounded-full bg-white/[0.06]"><div className="h-full rounded-full bg-cyan-400/70" style={{ width: `${item.share}%` }} /></div>
                   </div>
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-white/10 p-2.5 text-[11px] text-slate-500"><Info className="h-3.5 w-3.5" />Skill telemetry is not connected yet.</div>
+            </div>
+          </div>
+          <Link href="/efficiency" className="mt-4 inline-flex items-center text-xs font-medium text-cyan-300 hover:text-cyan-200">Inspect models, agents, skills and plugins <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link>
+        </Panel>
+      </section>
+
+      <Panel title="Top actions" description="Three evidence-backed moves with the clearest path to lower usage or better delivery." badge={`${topActions.length} prioritized`}>
+        <div className="grid gap-3 lg:grid-cols-3">
+          {topActions.map((action, index) => (
+            <Link key={action.id} href="/recommendations" className="group rounded-xl border border-white/[0.07] bg-white/[0.025] p-4 transition-colors hover:border-cyan-400/20 hover:bg-white/[0.045]">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400/10 text-cyan-300"><Lightbulb className="h-4 w-4" /></div>
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${opportunityTone[action.severity]}`}>{action.severity}</span>
+              </div>
+              <h3 className="mt-4 text-sm font-semibold text-slate-100 group-hover:text-white">{action.title}</h3>
+              <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-400">{action.recommendedAction}</p>
+              <div className="mt-4 flex items-center justify-between text-[11px] text-slate-500"><span>{action.scopeLabel}</span><span className="flex items-center text-cyan-300">Review <ArrowRight className="ml-1 h-3 w-3" /></span></div>
+            </Link>
+          ))}
         </div>
+      </Panel>
+    </div>
+  );
+}
+
+function Panel({ title, description, badge, children }: { title: string; description: string; badge?: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-5 shadow-[0_20px_60px_rgba(0,0,0,.14)] lg:p-6">
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div><h2 className="text-base font-semibold text-slate-100">{title}</h2><p className="mt-1 text-xs leading-5 text-slate-500">{description}</p></div>
+        {badge ? <Badge variant="outline" className="shrink-0 border-white/10 text-[10px] font-medium text-slate-400">{badge}</Badge> : null}
       </div>
+      {children}
+    </section>
+  );
+}
+
+function KpiCell({ icon: Icon, label, value, detail, delta, tone }: { icon: typeof Gauge; label: string; value: string; detail: string; delta: string; tone: "amber" | "green" | "muted" }) {
+  const toneClass = tone === "amber" ? "text-amber-300" : tone === "green" ? "text-emerald-300" : "text-slate-500";
+  return (
+    <div className="border-b border-white/[0.08] p-5 last:border-b-0 sm:[&:nth-child(odd)]:border-r xl:border-b-0 xl:border-r xl:last:border-r-0">
+      <div className="flex items-center justify-between"><span className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">{label}</span><Icon className="h-4 w-4 text-slate-600" /></div>
+      <div className="mt-3 flex items-end justify-between gap-3"><span className="text-xl font-semibold tracking-tight text-white">{value}</span><span className={`text-xs font-medium ${toneClass}`}>{delta}</span></div>
+      <p className="mt-1.5 text-[11px] text-slate-500">{detail}</p>
     </div>
   );
 }
 
-function KpiCard({
-  label,
-  value,
-  hint,
-  href,
-  tone = "default",
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  href: string;
-  tone?: "default" | "amber";
-}) {
-  return (
-    <Link href={href}>
-      <Card className="border-white/6 bg-[linear-gradient(180deg,rgba(17,24,39,0.98),rgba(10,15,28,0.98))] shadow-lg transition-colors hover:bg-[#131c2d] hover:border-blue-500/18 cursor-pointer">
-        <CardContent className="pt-5 pb-5">
-          <p className="dashboard-eyebrow">{label}</p>
-          <p
-            className={`mt-3 text-[1.52rem] md:text-[1.74rem] leading-[1.05] font-semibold text-balance ${
-              tone === "amber" ? "text-amber-200" : "text-white"
-            }`}
-          >
-            {value}
-          </p>
-          <p className="dashboard-muted-body mt-3">{hint}</p>
-        </CardContent>
-      </Card>
-    </Link>
-  );
+function MetricRow({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return <div className="flex items-center justify-between"><span className="text-slate-400">{label}</span><span className={`font-medium ${tone}`}>{value}</span></div>;
 }
 
-function SummaryChip({ label, value, href }: OverviewSummaryChip) {
-  const content = (
-    <div className="rounded-xl border border-white/6 bg-black/20 px-4 py-3 min-h-[76px] transition-colors hover:border-white/10 hover:bg-white/[0.03]">
-      <p className="dashboard-eyebrow">{label}</p>
-      <p className="mt-2 text-sm md:text-[0.98rem] font-semibold leading-snug text-slate-100 text-balance">{value}</p>
-    </div>
-  );
-
-  if (!href) {
-    return content;
-  }
-
-  return <Link href={href}>{content}</Link>;
+function LegendKey({ color, label }: { color: string; label: string }) {
+  return <span className="inline-flex items-center gap-1.5"><span className={`h-2 w-2 rounded-full ${color}`} />{label}</span>;
 }
 
-function OverviewTile({
-  title,
-  metric,
-  detail,
-  href,
-  emphasis = "default",
-}: {
-  title: string;
-  metric: string;
-  detail: string;
-  href: string;
-  emphasis?: "default" | "alert";
-}) {
-  return (
-    <Link href={href}>
-      <Card
-        className={`shadow-lg transition-colors cursor-pointer ${
-          emphasis === "alert"
-            ? "border-amber-500/18 bg-[linear-gradient(180deg,rgba(32,22,8,0.55),rgba(17,24,39,0.98))] hover:border-amber-500/30 hover:bg-[linear-gradient(180deg,rgba(55,35,8,0.62),rgba(17,24,39,0.98))]"
-            : "border-white/5 bg-[#111827] hover:border-blue-500/20 hover:bg-[#131c2d]"
-        }`}
-      >
-        <CardContent className="pt-5 pb-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 pr-2">
-              <p className={`dashboard-eyebrow ${emphasis === "alert" ? "text-amber-200" : ""}`}>{title}</p>
-              <p className="mt-3 text-[1.14rem] md:text-[1.26rem] font-semibold leading-[1.16] text-white text-balance">{metric}</p>
-              <p className={`mt-2 text-sm font-medium ${emphasis === "alert" ? "text-amber-200" : "text-slate-300"}`}>{detail}</p>
-            </div>
-            {emphasis === "alert" ? (
-              <AlertTriangle className="w-5 h-5 text-amber-300 shrink-0" />
-            ) : (
-              <ArrowUpRight className="w-5 h-5 text-slate-500 shrink-0" />
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
+function buildWorkflowMix() {
+  const buckets = new Map<string, number>();
+  TELEMETRY_DATA.interactions.forEach((interaction) => {
+    const label = interaction.agentPattern && interaction.agentPattern !== "None"
+      ? `Agent · ${interaction.agentPattern}`
+      : interaction.pluginName !== "Direct Assistant"
+        ? `Plugin · ${interaction.pluginName}`
+        : interaction.requestSource || "Direct assistant";
+    buckets.set(label, (buckets.get(label) ?? 0) + interaction.estimatedCredits);
+  });
+  const sorted = Array.from(buckets.entries()).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const max = sorted[0]?.[1] ?? 1;
+  return sorted.map(([label, value]) => ({ label, share: Math.max(8, Math.round((value / max) * 100)) }));
 }
 
-function BriefSignal({ label, value, note }: { label: string; value: string; note: string }) {
-  return (
-    <div className="rounded-xl border border-white/6 bg-black/20 px-4 py-3">
-      <p className="dashboard-eyebrow">{label}</p>
-      <p className="mt-2 text-base font-semibold text-white leading-tight text-balance">{value}</p>
-      <p className="dashboard-muted-body mt-1">{note}</p>
-    </div>
-  );
-}
-
-function RankedList({
-  title,
-  items,
-}: {
-  title: string;
-  items: Array<{ id: string; label: string; amount: number; value: string; href: string }>;
-}) {
-  return (
-    <div className="p-5">
-      <h3 className="text-sm uppercase tracking-[0.18em] text-slate-400 mb-4">{title}</h3>
-      <div className="grid grid-cols-1 gap-3">
-        {items.map((item, index) => (
-          <div key={`${item.id}-rail`} className="rounded-xl border border-white/5 bg-black/20 px-3 py-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-200 text-balance">{item.label}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-slate-400">{item.value}</span>
-                <div className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[11px] text-blue-300">
-                  {index + 1}
-                </div>
-              </div>
-            </div>
-            <div className="mt-2 h-2.5 rounded-full bg-white/6 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,#3b82f6,#60a5fa)]"
-                style={{ width: `${items[0]?.amount ? Math.max(16, (item.amount / items[0].amount) * 100) : 16}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-3 grid grid-cols-1 gap-2">
-        {items.map((item, index) => (
-          <Link key={item.id} href={item.href}>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-2.5 hover:bg-white/[0.03] transition-colors cursor-pointer">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[11px] text-blue-300 shrink-0">
-                  {index + 1}
-                </div>
-                <p className="text-sm text-slate-200 truncate">{item.label}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-slate-400">{item.value}</span>
-                <ArrowUpRight className="w-4 h-4 text-slate-500" />
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
+function buildReasoningFit() {
+  const classified = TELEMETRY_DATA.interactions.filter((interaction) => interaction.modelCategory !== "Auto");
+  if (!classified.length) return { rightSized: 68, overpowered: 24, underpowered: 8 };
+  const highReasoning = classified.filter((interaction) => interaction.modelCategory === "High Reasoning").length;
+  const overpowered = Math.max(12, Math.min(34, Math.round((highReasoning / classified.length) * 54)));
+  const underpowered = Math.max(6, Math.round(overpowered * 0.32));
+  return { rightSized: 100 - overpowered - underpowered, overpowered, underpowered };
 }
