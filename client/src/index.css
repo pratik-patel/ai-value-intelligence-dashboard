@@ -235,3 +235,105 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* The dashboard defaults to an operations-friendly dark theme. The optional
+   light theme is persisted for executive reviews, projectors, and print-like use. */
+:root[data-theme="light"] body {
+  background: #eef3f8;
+  color: #172033;
+}
+
+:root[data-theme="light"] .app-shell {
+  background: #eef3f8 !important;
+  color: #172033 !important;
+}
+
+:root[data-theme="light"] .app-header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: #d8e1eb !important;
+  box-shadow: 0 1px 8px rgba(15, 23, 42, 0.06);
+}
+
+:root[data-theme="light"] .app-scopebar {
+  background: #f5f8fb !important;
+  border-color: #d8e1eb !important;
+}
+
+:root[data-theme="light"] .app-main {
+  background: radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 34%), linear-gradient(180deg, #f5f8fb 0%, #eaf0f6 100%) !important;
+}
+
+:root[data-theme="light"] .app-select {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+:root[data-theme="light"] .app-shell .text-white,
+:root[data-theme="light"] .app-shell .text-slate-100,
+:root[data-theme="light"] .app-shell .text-slate-200 {
+  color: #172033 !important;
+}
+
+:root[data-theme="light"] .app-shell .text-slate-300 {
+  color: #334155 !important;
+}
+
+:root[data-theme="light"] .app-shell .text-slate-400 {
+  color: #475569 !important;
+}
+
+:root[data-theme="light"] .app-shell .text-slate-500,
+:root[data-theme="light"] .app-shell .text-slate-600 {
+  color: #64748b !important;
+}
+
+:root[data-theme="light"] .app-shell .text-cyan-200,
+:root[data-theme="light"] .app-shell .text-cyan-300 {
+  color: #0e7490 !important;
+}
+
+:root[data-theme="light"] .app-shell .text-violet-200,
+:root[data-theme="light"] .app-shell .text-violet-300 {
+  color: #6d28d9 !important;
+}
+
+:root[data-theme="light"] .app-shell .text-emerald-200,
+:root[data-theme="light"] .app-shell .text-emerald-300 {
+  color: #047857 !important;
+}
+
+:root[data-theme="light"] .app-shell .text-amber-200,
+:root[data-theme="light"] .app-shell .text-amber-300 {
+  color: #a16207 !important;
+}
+
+:root[data-theme="light"] .app-shell [class*="bg-[#0b1625]"],
+:root[data-theme="light"] .app-shell [class*="bg-[#111827]"],
+:root[data-theme="light"] .app-shell [class*="bg-[#0d1d2c]"] {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  background-image: none !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.045);
+}
+
+:root[data-theme="light"] .app-shell [class*="bg-black/"],
+:root[data-theme="light"] .app-shell [class*="bg-white/"] {
+  background-color: rgba(15, 23, 42, 0.045) !important;
+}
+
+:root[data-theme="light"] .app-shell [class*="border-white/"] {
+  border-color: rgba(71, 85, 105, 0.18) !important;
+}
+
+:root[data-theme="light"] .app-shell .chart-tooltip {
+  background: rgba(7, 16, 28, 0.97) !important;
+}
+
+:root[data-theme="light"] .app-shell .chart-tooltip [class*="text-slate"],
+:root[data-theme="light"] .app-shell .chart-tooltip .text-white {
+  color: #e2e8f0 !important;
+}
+
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.16);
+}

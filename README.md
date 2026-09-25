@@ -16,7 +16,7 @@ The product is intentionally application-neutral. IDE assistants, command-line t
 The interface uses progressive disclosure instead of putting every metric on one screen:
 
 - **Overview** — scoped usage, modeled delivery value, trend, peer comparison, and top actions.
-- **Organization** — Enterprise → Portfolio → Team → User navigation with lateral peer comparison.
+- **Organization** — explicit portfolio, team, and user comparison with peer trend lines, an efficiency frontier, sortable benchmarks, and attribution drivers.
 - **Efficiency & ROI** — outcome efficiency, reasoning fit, workflow share, and skill-effectiveness patterns.
 - **Optimize** — ranked evidence-backed actions and scenario planning.
 - **Evidence** — trace inspection, confidence, reports, and audit detail.
@@ -64,6 +64,8 @@ npm run build
 - No production authentication, data warehouse, or delivery-system integration
 
 The sample implementation is a product prototype. Before production use, move prompt/evidence data and aggregation behind authenticated APIs with RBAC, redaction, retention controls, audit logs, and minimum-cohort privacy rules.
+
+The interface defaults to dark mode for continuous monitoring and includes a persisted light mode for executive reviews and projection. The detailed persona questions and session model are documented in [`docs/PORTAL_INFORMATION_ARCHITECTURE.md`](docs/PORTAL_INFORMATION_ARCHITECTURE.md).
 
 ## Recommended vendor-neutral event model
 

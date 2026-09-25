@@ -17,19 +17,19 @@ function hash(value: string) {
   return value.split("").reduce((total, character) => ((total * 31 + character.charCodeAt(0)) >>> 0), 17);
 }
 
-export function getValueMetrics(interactions: InteractionSummary[], scopeKey = "enterprise"): ValueMetrics {
-  const seed = hash(scopeKey);
+export function getValueMetrics(interactions: InteractionSummary[], _scopeKey = "enterprise"): ValueMetrics {
   const usage = interactions.reduce((total, item) => total + item.estimatedCredits, 0);
   const runs = interactions.length;
-  const successRate = 0.68 + (seed % 17) / 100;
-  const successfulOutcomes = Math.round(runs * successRate);
-  const qualityPassRate = Math.min(96, 82 + (seed % 13));
-  const hoursSaved = successfulOutcomes * (0.72 + (seed % 9) / 10);
+  const successfulRows = interactions.filter((item) => hash(`${item.id}:outcome`) % 100 < 79);
+  const qualityRows = interactions.filter((item) => hash(`${item.id}:quality`) % 100 < 88);
+  const successfulOutcomes = successfulRows.length;
+  const qualityPassRate = runs ? Math.round(qualityRows.length / runs * 100) : 0;
+  const hoursSaved = successfulRows.reduce((total, item) => total + 0.7 + (hash(`${item.id}:time`) % 10) / 10, 0);
   const estimatedCost = usage * 0.032;
   const estimatedBenefit = hoursSaved * 92 * (qualityPassRate / 100);
   const roi = estimatedCost ? (estimatedBenefit - estimatedCost) / estimatedCost : 0;
   const efficiencyIndex = usage ? (successfulOutcomes / usage) * 1000 : 0;
-  const cycleTimeImprovement = 12 + (seed % 23);
+  const cycleTimeImprovement = runs ? Math.round(interactions.reduce((total, item) => total + 12 + (hash(`${item.id}:cycle`) % 23), 0) / runs) : 0;
   return { usage, runs, successfulOutcomes, qualityPassRate, hoursSaved, estimatedCost, estimatedBenefit, roi, efficiencyIndex, cycleTimeImprovement };
 }
 
