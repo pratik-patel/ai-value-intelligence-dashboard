@@ -3,25 +3,28 @@ import { ExternalLink, FileText, Search } from "lucide-react";
 import { Link } from "wouter";
 
 import { Badge } from "@/components/ui/badge";
+import { getScopedInteractions, useDashboardScope } from "@/lib/scope-context";
 import { TELEMETRY_DATA, formatConsumption } from "@/lib/telemetry-data";
 
 type View = "traces" | "reports";
 
 export default function ReportEvidenceConsole() {
+  const scope = useDashboardScope();
   const [view, setView] = useState<View>("traces");
   const [query, setQuery] = useState("");
+  const scopedInteractions = getScopedInteractions(scope);
   const traces = useMemo(() => {
     const term = query.trim().toLowerCase();
-    return TELEMETRY_DATA.interactions
+    return scopedInteractions
       .filter((item) => !term || [item.id, item.engineerName, item.useCaseLabel, item.modelName, item.pluginName].some((value) => value.toLowerCase().includes(term)))
       .sort((a, b) => b.estimatedCredits - a.estimatedCredits)
       .slice(0, 25);
-  }, [query]);
+  }, [query, scopedInteractions]);
 
   return (
     <div className="mx-auto max-w-[1440px] space-y-5 px-5 py-7 lg:px-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-300">Evidence</p><h1 className="mt-1 text-2xl font-semibold text-white">Trace and report library</h1></div>
+        <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-300">Evidence</p><h1 className="mt-1 text-2xl font-semibold text-white">Trace and report library</h1><p className="mt-1 text-xs text-slate-500">Filtered by the global organization, period and application controls.</p></div>
         <div className="flex w-fit gap-1 rounded-lg border border-white/10 bg-[#0b1625] p-1">
           <button onClick={() => setView("traces")} className={`rounded-md px-3 py-1.5 text-xs ${view === "traces" ? "bg-white/10 text-white" : "text-slate-500"}`}>Traces</button>
           <button onClick={() => setView("reports")} className={`rounded-md px-3 py-1.5 text-xs ${view === "reports" ? "bg-white/10 text-white" : "text-slate-500"}`}>Reports</button>

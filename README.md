@@ -15,9 +15,9 @@ The product is intentionally application-neutral. IDE assistants, command-line t
 
 The interface uses progressive disclosure instead of putting every metric on one screen:
 
-- **Overview** — enterprise posture, trend, portfolio contribution, efficiency frontier, major drivers, and top actions.
-- **Organization** — Enterprise → Portfolio → Team → User drilldown.
-- **Efficiency & ROI** — outcome readiness, ROI contract, reasoning fit, and agent/plugin/skill attribution.
+- **Overview** — scoped usage, modeled delivery value, trend, peer comparison, and top actions.
+- **Organization** — Enterprise → Portfolio → Team → User navigation with lateral peer comparison.
+- **Efficiency & ROI** — outcome efficiency, reasoning fit, workflow share, and skill-effectiveness patterns.
 - **Optimize** — ranked evidence-backed actions and scenario planning.
 - **Evidence** — trace inspection, confidence, reports, and audit detail.
 
@@ -32,7 +32,7 @@ The dashboard distinguishes four metric states:
 - **Estimated** — modeled with stated assumptions.
 - **Illustrative** — demonstrates a future experience and must not be used as a business claim.
 
-ROI remains unavailable until finance and delivery outcomes are connected. The intended contract is:
+The prototype now renders deterministic **illustrative** outcomes and ROI so the complete experience can be evaluated. These are visibly labeled and are not business claims. In production, ROI remains unavailable until finance and delivery outcomes are connected. The intended contract is:
 
 ```text
 Estimated ROI = (realized benefit - total AI cost) / total AI cost

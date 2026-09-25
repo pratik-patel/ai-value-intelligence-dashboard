@@ -45,7 +45,7 @@ export default function Recommendations() {
 
         {selected ? (
           <section className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-5 lg:p-6">
-            <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Badge className={selected.severity === "High" ? "border-amber-400/20 bg-amber-400/10 text-amber-200" : "border-sky-400/20 bg-sky-400/10 text-sky-200"}>{selected.severity}</Badge><Badge variant="outline" className="border-white/10 text-slate-500">{selected.type}</Badge></div><h2 className="mt-4 text-xl font-semibold text-white">{selected.title}</h2><p className="mt-1 text-xs text-slate-500">{selected.scopeType} · {selected.scopeLabel}</p></div><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300"><Lightbulb className="h-5 w-5" /></div></div>
+            <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Badge className={selected.severity === "High" ? "border-amber-400/20 bg-amber-400/10 text-amber-200" : "border-sky-400/20 bg-sky-400/10 text-sky-200"}>{selected.severity}</Badge><Badge variant="outline" className="border-white/10 text-slate-500">{selected.type}</Badge></div><h2 className="mt-4 text-xl font-semibold text-white">{selected.title}</h2><p className="mt-1 text-xs text-slate-500">{displayScope(selected.scopeType)} · {selected.scopeLabel}</p></div><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300"><Lightbulb className="h-5 w-5" /></div></div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <Fact label="Evidence" value={`${selected.evidenceInteractionIds.length} traces`} />
@@ -80,7 +80,13 @@ function DecisionBlock({ label, value, emphasize }: { label: string; value: stri
 
 function ownerFor(scope: string) {
   if (scope === "Engineer") return "Team lead";
-  if (scope === "Team") return "Engineering manager";
+  if (scope === "Team") return "Portfolio lead";
   if (scope === "Cost Center") return "Portfolio lead";
   return "AI platform lead";
+}
+
+function displayScope(scope: string) {
+  if (scope === "Engineer") return "User";
+  if (scope === "Cost Center") return "Portfolio";
+  return scope;
 }

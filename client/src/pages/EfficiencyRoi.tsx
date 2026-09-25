@@ -1,115 +1,60 @@
-import { ArrowRight, Bot, CheckCircle2, CircleDollarSign, DatabaseZap, GitPullRequest, Puzzle, Sparkles, Workflow } from "lucide-react";
+import { ArrowRight, CircleDollarSign, GitPullRequest, Sparkles, Target } from "lucide-react";
 import { Link } from "wouter";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TELEMETRY_DATA, formatConsumption } from "@/lib/telemetry-data";
+import { getScopedInteractions, useDashboardScope } from "@/lib/scope-context";
+import { formatConsumption } from "@/lib/telemetry-data";
+import { getReasoningFit, getSkillValue, getValueMetrics, getWorkflowValue } from "@/lib/value-data";
+
+const colors = ["#22d3ee", "#8b5cf6", "#34d399", "#f59e0b", "#64748b"];
 
 export default function EfficiencyRoi() {
-  const total = TELEMETRY_DATA.kpis.totalConsumption;
-  const highReasoning = TELEMETRY_DATA.interactions.filter((item) => item.modelCategory === "High Reasoning");
-  const highReasoningUsage = highReasoning.reduce((sum, item) => sum + item.estimatedCredits, 0);
-  const potentialAvoidable = highReasoningUsage * 0.18;
-  const modelRows = summarize("modelName");
-  const agentRows = summarize("agentPattern", "None");
-  const pluginRows = summarize("pluginName", "Direct Assistant");
+  const scope = useDashboardScope();
+  const interactions = getScopedInteractions(scope);
+  const metrics = getValueMetrics(interactions, scope.userId || scope.teamId || scope.portfolioId || "enterprise");
+  const reasoning = getReasoningFit(interactions);
+  const workflows = getWorkflowValue(interactions).slice(0, 5);
+  const skills = getSkillValue(interactions);
+  const scatter = workflows.map((item) => ({ name: item.name, usage: Math.round(item.usage), outcomes: item.successfulOutcomes, quality: item.qualityPassRate }));
 
   return (
-    <div className="mx-auto max-w-[1500px] space-y-6 px-5 py-8 lg:px-8">
+    <div className="mx-auto max-w-[1500px] space-y-5 px-5 py-7 lg:px-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-300">Value</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">Efficiency & ROI</h1>
-        </div>
-        <Link href="/studio"><Button variant="outline" className="border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]">Open scenario planner <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+        <div><p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-300">Efficiency & ROI</p><h1 className="mt-1 text-2xl font-semibold text-white">Turn consumption into evidence of value.</h1><p className="mt-1 text-xs text-slate-500">Compare output, model fit and workflow efficiency in the current scope.</p></div>
+        <div className="flex items-center gap-2"><Badge variant="outline" className="border-violet-400/20 text-violet-200">Illustrative outcomes</Badge><Link href="/studio"><Button variant="outline" className="border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]">Model a change <ArrowRight className="ml-2 h-4 w-4" /></Button></Link></div>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={CircleDollarSign} label="Estimated ROI" value="Not available" note="Finance + outcomes required" status="Missing data" />
-        <Metric icon={GitPullRequest} label="Cost / successful outcome" value="Not available" note="Delivery link required" status="Missing data" />
-        <Metric icon={Sparkles} label="Potential avoidable usage" value={`${formatConsumption(potentialAvoidable)} units`} note="Modeled from reasoning tier" status="Estimated" />
-        <Metric icon={CheckCircle2} label="Telemetry coverage" value="86%" note="Usage events with attribution" status="Observed" />
+      <section className="grid overflow-hidden rounded-2xl border border-white/10 bg-[#0b1625]/82 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={CircleDollarSign} label="Estimated ROI" value={`${metrics.roi.toFixed(1)}×`} note={`$${Math.round(metrics.estimatedBenefit).toLocaleString()} benefit`} />
+        <Metric icon={GitPullRequest} label="Successful outcomes" value={metrics.successfulOutcomes.toLocaleString()} note={`${metrics.qualityPassRate}% quality pass`} />
+        <Metric icon={Target} label="Outcome efficiency" value={metrics.efficiencyIndex.toFixed(1)} note="outcomes / 1K units" />
+        <Metric icon={Sparkles} label="Cycle-time change" value={`+${metrics.cycleTimeImprovement}%`} note={`${Math.round(metrics.hoursSaved)} hours modeled`} />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
-        <div className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div><h2 className="text-base font-semibold text-slate-100">Data readiness</h2></div>
-            <Badge variant="outline" className="border-amber-400/20 text-amber-200">2 sources needed</Badge>
-          </div>
-          <div className="mt-6 space-y-3">
-            <ReadinessRow icon={DatabaseZap} title="AI telemetry" detail="Usage, model, application, agent and plugin attribution" status="Connected" tone="green" />
-            <ReadinessRow icon={Workflow} title="Delivery outcomes" detail="Work items, merged PRs, deployments, cycle time and quality" status="Connect" tone="amber" />
-            <ReadinessRow icon={CircleDollarSign} title="Financial model" detail="Provider price book, fixed licenses, labor value and realization factor" status="Connect" tone="amber" />
-          </div>
-          <div className="mt-5 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.06] p-4 text-xs leading-5 text-slate-300">
-            <span className="font-semibold text-cyan-200">Next:</span> connect quality-gated merged PRs.
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-6">
-          <h2 className="text-base font-semibold text-slate-100">ROI contract</h2>
-          <div className="mt-6 rounded-xl border border-white/[0.07] bg-black/20 p-5 text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">Estimated ROI</p>
-            <p className="mt-3 text-lg font-semibold text-white">(Realized benefit − AI cost) ÷ AI cost</p>
-          </div>
-          <ul className="mt-5 space-y-3 text-xs leading-5 text-slate-400">
-            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Benefit:</b> time saved × labor value.</span></li>
-            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Cost:</b> provider + subscription spend.</span></li>
-            <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" /><span><b className="text-slate-200">Guardrail:</b> quality and rework.</span></li>
-          </ul>
-        </div>
+      <section className="grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
+        <Panel title="Usage vs. successful outcomes" subtitle="Upper-left patterns produce more with less.">
+          <div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><ScatterChart margin={{ top: 15, right: 20, bottom: 15, left: 0 }}><CartesianGrid stroke="rgba(148,163,184,.09)" strokeDasharray="4 4" /><XAxis type="number" dataKey="usage" name="Usage" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis type="number" dataKey="outcomes" name="Outcomes" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} /><ZAxis dataKey="quality" range={[80, 220]} /><Tooltip cursor={{ strokeDasharray: "3 3" }} contentStyle={{ background: "#0b1625", border: "1px solid rgba(255,255,255,.12)", borderRadius: 10 }} /><Scatter data={scatter} fill="#22d3ee" /></ScatterChart></ResponsiveContainer></div>
+        </Panel>
+        <Panel title="Workflow share" subtitle="Where the current scope spends its capacity.">
+          <div className="h-[250px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={workflows} dataKey="value" nameKey="name" innerRadius={58} outerRadius={88} paddingAngle={3}>{workflows.map((item, index) => <Cell key={item.name} fill={colors[index % colors.length]} />)}</Pie><Tooltip contentStyle={{ background: "#0b1625", border: "1px solid rgba(255,255,255,.12)", borderRadius: 10 }} formatter={(value: number) => `${formatConsumption(value)} units`} /><Legend iconType="circle" wrapperStyle={{ fontSize: 11, color: "#94a3b8" }} /></PieChart></ResponsiveContainer></div>
+        </Panel>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div><h2 className="text-base font-semibold text-slate-100">Reasoning-fit opportunity</h2><p className="mt-1 text-xs leading-5 text-slate-500">High-reasoning does not automatically mean waste. Validate task complexity and outcome quality before routing changes.</p></div>
-          <Badge variant="outline" className="w-fit border-white/10 text-slate-400">{formatConsumption(highReasoningUsage)} high-reasoning units</Badge>
-        </div>
-        <div className="mt-5 overflow-x-auto rounded-xl border border-white/[0.07]">
-          <table className="w-full min-w-[700px] text-left text-xs">
-            <thead className="bg-black/20 text-[10px] uppercase tracking-[0.12em] text-slate-500"><tr><th className="px-4 py-3">Model</th><th className="px-4 py-3">Usage</th><th className="px-4 py-3">Share</th><th className="px-4 py-3">Routing signal</th><th className="px-4 py-3">Confidence</th></tr></thead>
-            <tbody className="divide-y divide-white/[0.06]">
-              {modelRows.slice(0, 5).map((row, index) => (
-                <tr key={row.label} className="text-slate-300"><td className="px-4 py-3.5 font-medium text-slate-200">{row.label}</td><td className="px-4 py-3.5">{formatConsumption(row.usage)} units</td><td className="px-4 py-3.5">{Math.round((row.usage / total) * 100)}%</td><td className="px-4 py-3.5 text-slate-400">{index < 2 ? "Review simple tasks on high tier" : "Monitor quality and retries"}</td><td className="px-4 py-3.5"><Badge variant="outline" className="border-white/10 text-[10px] text-slate-400">Medium</Badge></td></tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <section className="grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
+        <Panel title="Reasoning-tier fit" subtitle="Amber usage is a candidate for task-level review, not automatic downgrade.">
+          <div className="h-[270px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={reasoning} layout="vertical" margin={{ left: 18, right: 20 }}><CartesianGrid stroke="rgba(148,163,184,.08)" horizontal={false} /><XAxis type="number" hide /><YAxis type="category" dataKey="tier" width={72} tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "#0b1625", border: "1px solid rgba(255,255,255,.12)", borderRadius: 10 }} formatter={(value: number) => `${formatConsumption(value)} units`} /><Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} /><Bar dataKey="appropriate" name="Likely fit" stackId="fit" fill="#34d399" radius={[4, 0, 0, 4]} /><Bar dataKey="review" name="Review" stackId="fit" fill="#f59e0b" radius={[0, 4, 4, 0]} /></BarChart></ResponsiveContainer></div>
+        </Panel>
+        <Panel title="Skill effectiveness" subtitle="Modeled until explicit skill-run telemetry is connected.">
+          <div className="space-y-3">{skills.map((skill, index) => <div key={skill.name} className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3.5"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-medium text-slate-200">{skill.name}</p><p className="mt-0.5 text-[11px] text-slate-500">{skill.outcomes} outcomes · {formatConsumption(skill.usage)} units</p></div><span className="text-sm font-semibold" style={{ color: colors[index % colors.length] }}>{skill.efficiency.toFixed(1)}</span></div><div className="mt-3 h-1.5 rounded-full bg-white/[0.06]"><div className="h-full rounded-full" style={{ width: `${Math.min(100, skill.efficiency * 7)}%`, backgroundColor: colors[index % colors.length] }} /></div></div>)}</div>
+        </Panel>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-3">
-        <AttributionCard icon={Bot} title="Agents" rows={agentRows} empty="No named agent runs found" />
-        <AttributionCard icon={Puzzle} title="Plugins & tools" rows={pluginRows} empty="No named plugins found" />
-        <AttributionCard icon={Workflow} title="Skills" rows={[]} empty="Skill telemetry is not connected. Add skill name, version, run ID, success, latency and cost to compare effectiveness." />
-      </section>
+      <div className="rounded-xl border border-violet-400/15 bg-violet-400/[0.05] px-4 py-3 text-xs text-slate-400"><b className="text-violet-200">Data note:</b> usage and attribution come from the sample telemetry. Outcomes, quality, labor value and ROI are deterministic illustrative data designed to show the intended product experience.</div>
     </div>
   );
 }
 
-type SummaryRow = { label: string; usage: number; runs: number };
-
-function summarize(key: "modelName" | "agentPattern" | "pluginName", excluded?: string): SummaryRow[] {
-  const map = new Map<string, SummaryRow>();
-  TELEMETRY_DATA.interactions.forEach((interaction) => {
-    const label = interaction[key];
-    if (!label || label === excluded) return;
-    const current = map.get(label) ?? { label, usage: 0, runs: 0 };
-    current.usage += interaction.estimatedCredits;
-    current.runs += 1;
-    map.set(label, current);
-  });
-  return Array.from(map.values()).sort((a, b) => b.usage - a.usage);
-}
-
-function Metric({ icon: Icon, label, value, note, status }: { icon: typeof Sparkles; label: string; value: string; note: string; status: string }) {
-  return <div className="rounded-xl border border-white/10 bg-[#0b1625]/82 p-5"><div className="flex items-center justify-between"><span className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">{label}</span><Icon className="h-4 w-4 text-slate-600" /></div><p className="mt-3 text-xl font-semibold text-white">{value}</p><div className="mt-2 flex items-center justify-between gap-3 text-[11px]"><span className="text-slate-500">{note}</span><span className={status === "Observed" ? "text-emerald-300" : status === "Estimated" ? "text-amber-300" : "text-slate-500"}>{status}</span></div></div>;
-}
-
-function ReadinessRow({ icon: Icon, title, detail, status, tone }: { icon: typeof Workflow; title: string; detail: string; status: string; tone: "green" | "amber" }) {
-  return <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3.5"><div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone === "green" ? "bg-emerald-400/10 text-emerald-300" : "bg-amber-400/10 text-amber-300"}`}><Icon className="h-4 w-4" /></div><div className="min-w-0 flex-1"><p className="text-sm font-medium text-slate-200">{title}</p><p className="truncate text-[11px] text-slate-500">{detail}</p></div><Badge variant="outline" className={tone === "green" ? "border-emerald-400/20 text-emerald-300" : "border-amber-400/20 text-amber-300"}>{status}</Badge></div>;
-}
-
-function AttributionCard({ icon: Icon, title, rows, empty }: { icon: typeof Bot; title: string; rows: SummaryRow[]; empty: string }) {
-  return <div className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-5"><div className="flex items-center gap-2"><Icon className="h-4 w-4 text-cyan-300" /><h2 className="text-sm font-semibold text-slate-100">{title}</h2></div>{rows.length ? <div className="mt-4 space-y-3">{rows.slice(0, 4).map((row) => <div key={row.label} className="flex items-center justify-between gap-3 text-xs"><div className="min-w-0"><p className="truncate font-medium text-slate-300">{row.label}</p><p className="text-[11px] text-slate-500">{row.runs} runs</p></div><span className="whitespace-nowrap text-slate-400">{formatConsumption(row.usage)} units</span></div>)}</div> : <div className="mt-4 rounded-xl border border-dashed border-white/10 p-4 text-xs leading-5 text-slate-500">{empty}</div>}</div>;
-}
+function Panel({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) { return <section className="rounded-2xl border border-white/10 bg-[#0b1625]/82 p-5 lg:p-6"><div className="mb-4"><h2 className="text-sm font-semibold text-slate-100">{title}</h2><p className="mt-1 text-[11px] text-slate-500">{subtitle}</p></div>{children}</section>; }
+function Metric({ icon: Icon, label, value, note }: { icon: typeof Sparkles; label: string; value: string; note: string }) { return <div className="border-b border-white/[0.08] p-5 last:border-b-0 sm:[&:nth-child(odd)]:border-r xl:border-b-0 xl:border-r xl:last:border-r-0"><div className="flex items-center justify-between"><span className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-600">{label}</span><Icon className="h-4 w-4 text-violet-300" /></div><p className="mt-3 text-xl font-semibold text-white">{value}</p><p className="mt-1 text-[11px] text-slate-500">{note}</p></div>; }

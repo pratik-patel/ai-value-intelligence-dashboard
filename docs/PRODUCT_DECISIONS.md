@@ -4,12 +4,12 @@ The redesign was reviewed through three lenses: experience architecture, enterpr
 
 ## Decisions
 
-- Brand the product **AI Value Intelligence** with the descriptor **Token, Cost & Delivery Analytics**.
+- Brand the product **AI Value Intelligence** with the descriptor **Usage, Efficiency & Delivery Value**.
 - Do not use “Tokenizer Dashboard”; a tokenizer normally means the algorithm that turns text into tokens.
 - Treat applications and providers as filterable telemetry dimensions.
 - Organize the product around executive questions, not internal workflow stages.
 - Limit the first screen to seven decision-oriented blocks and move evidence detail into drilldowns.
-- Add a dedicated Efficiency & ROI workspace, but do not fabricate ROI when delivery and finance data are absent.
+- Add a dedicated Efficiency & ROI workspace. In the prototype, deterministic illustrative value data is acceptable only when visibly labeled; production ROI requires connected delivery and finance data.
 - Preserve the source unit as “usage units”; do not rename provider credits as tokens or dollars.
 - Avoid public individual productivity rankings. Compare patterns within matched cohorts and enforce minimum cohort sizes.
 - Remove client-side demo credentials. Production authentication and evidence handling belong behind secure server APIs.
@@ -21,7 +21,7 @@ The interface borrows proven observability patterns from Datadog and Grafana wit
 - persistent scope and time controls;
 - query-value KPI tiles, time-series panels, top lists, and exception tables;
 - cascading Enterprise → Portfolio → Team → User selection;
-- clicking a ranked row narrows the scope instead of opening another overloaded dashboard;
+- clicking a ranked row narrows the scope, while level tabs and cascading selectors allow lateral or upward movement;
 - detailed traces appear only in the Evidence workflow;
 - page-level prose is kept to labels, status, and the next action.
 
